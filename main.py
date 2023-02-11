@@ -2,7 +2,8 @@ from tkinter import *
 import tkinter.messagebox
 pageStatus = 1
 root = Tk()
-
+loginBG = PhotoImage(
+    file="C:/Users/GECKO/git-projects/Library management/media/loginBG.png")
 # general att
 root.title("Library manager")
 root.geometry("1200x800")
@@ -30,11 +31,16 @@ def loginPage():
             else:
                 global pageStatus
                 pageStatus = 2
+                canvas.destroy()
+
         except:
             tkinter.messagebox.showwarning(
                 title="error", message="credential is wrong")
 
     root.config(bg="#559364")
+    lblphoto = Label(root, image=loginBG,
+                     width=root.winfo_screenwidth(), height=root.winfo_screenheight())
+    lblphoto.pack()
     canvas = Canvas(root, width=500, height=500,
                     bg="#AEC09A", highlightthickness=0, highlightbackground="#559364")
     canvas.place(relx=.5, rely=.5, anchor=CENTER)
@@ -63,9 +69,9 @@ def loginPage():
 
 
 def firstMenu():
-    btnLogin = Button(root, bg='#559364', text="Login",
-                      )
-    btnLogin.place(relx=.5, rely=.7, anchor=CENTER)
+    canvas = Canvas(root, width=1000, height=800,
+                    bg="#AEC09A", highlightthickness=0, highlightbackground="#559364")
+    canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
 
 pageDecider(pageStatus)
