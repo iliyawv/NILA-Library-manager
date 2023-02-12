@@ -1,6 +1,6 @@
 from tkinter import *
 import tkinter.messagebox
-
+from PIL import Image, ImageTk
 
 # general attributes
 pageStatus = 1
@@ -18,6 +18,12 @@ root = Tk()
 
 loginBG = PhotoImage(
     file="C:/Users/GECKO/git-projects/Library management/media/libBG.png")
+
+ico = Image.open(
+    "C:/Users/GECKO/git-projects/Library management/media/icon.png")
+photo = ImageTk.PhotoImage(ico)
+root.wm_iconphoto(False, photo)
+
 # root attributes
 root.title("Library manager")
 root.geometry("1200x800")
@@ -40,7 +46,7 @@ def pageDecider(value):
 # login page and the first page of program
 def loginPage():
 
-    def login():
+    def login(e=""):
         username = entUsername.get()
         password = entPass.get()
         try:
@@ -48,7 +54,7 @@ def loginPage():
                 f"C:/Users/GECKO/git-projects/Library management/{username}.txt", "r")
             if credential.read() != password:
                 tkinter.messagebox.showwarning(
-                    title="error", message="credential is wrong")
+                    title="ERROR", message="credential is unmatched")
             else:
                 global pageStatus
                 pageStatus = 2
@@ -84,6 +90,8 @@ def loginPage():
     btnLogin = Button(canvas, bg=btnbg, text="Login",
                       font=("Helvetica Rounded", 14), command=login, width=11)
     btnLogin.place(relx=.5, rely=.64, anchor=CENTER)
+
+    entPass.bind("<Return>",  login)
 
 
 # main menu
