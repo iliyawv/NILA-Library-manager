@@ -3,8 +3,8 @@ import tkinter.messagebox
 from PIL import Image, ImageTk
 
 # general attributes
-pageStatus = 1
-
+pageStatus = 2
+isHidden = True
 
 # color pallete
 entfg = "#695f64"
@@ -16,6 +16,7 @@ btnbg = "#daccbf"
 
 root = Tk()
 
+# media
 loginBG = PhotoImage(
     file="C:/Users/GECKO/git-projects/Library management/media/libBG.png")
 
@@ -23,6 +24,11 @@ ico = Image.open(
     "C:/Users/GECKO/git-projects/Library management/media/icon.png")
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
+
+viewIcon = PhotoImage(
+    file="C:/Users/GECKO/git-projects/Library management/media/view.png")
+hiddenIcon = PhotoImage(
+    file="C:/Users/GECKO/git-projects/Library management/media/hidden.png")
 
 # root attributes
 root.title("Library manager")
@@ -65,7 +71,33 @@ def loginPage():
             tkinter.messagebox.showwarning(
                 title="error", message="credential is wrong")
 
-    canvas = Canvas(root, width=500, height=500,
+    def showSHIcon(e=""):
+
+        def showChar():
+            global isHidden
+            if isHidden == False:
+                entPass.config(show="*")
+                isHidden = True
+                btnShowPass.config(image=viewIcon)
+            else:
+                entPass.config(show="")
+                isHidden = False
+                btnShowPass.config(image=hiddenIcon)
+        global btnShowPass
+
+        btnShowPass = Button(canvas,
+                             width=25, height=25, command=showChar)
+        btnShowPass.place(relx=.77, rely=.65, anchor=CENTER)
+
+        if isHidden == False:
+            btnShowPass.config(image=hiddenIcon)
+        else:
+            btnShowPass.config(image=viewIcon)
+
+    def hideSHIcon(e=""):
+        btnShowPass.destroy()
+
+    canvas = Canvas(root, width=500, height=350,
                     bg=cnvsbg, highlightthickness=2, highlightbackground=cnvshl)
     canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
@@ -75,34 +107,36 @@ def loginPage():
 
     lbluser = Label(canvas, text="username", font=(
         "Helvetica Oblique", 11), bg=cnvsbg)
-    lbluser.place(relx=.262, rely=.323, anchor=CENTER)
+    lbluser.place(relx=.262, rely=.37, anchor=CENTER)
 
     lblpass = Label(canvas, text="password", font=(
         "Helvetica Oblique", 11), bg=cnvsbg)
-    lblpass.place(relx=.262, rely=.445, anchor=CENTER)
+    lblpass.place(relx=.262, rely=.57, anchor=CENTER)
 
     entryFont = ("Helvetica Rounded", 18)
     entUsername = Entry(canvas, font=entryFont, bg=entbg, fg=entfg)
-    entUsername.place(relx=.5, rely=.38, anchor=CENTER)
-    entPass = Entry(canvas, font=entryFont, bg=entbg, fg=entfg)
-    entPass.place(relx=.5, rely=.5, anchor=CENTER)
+    entUsername.place(relx=.5, rely=.45, anchor=CENTER)
+    entPass = Entry(canvas, show="*", font=entryFont, bg=entbg, fg=entfg)
+    entPass.place(relx=.5, rely=.65, anchor=CENTER)
 
     btnLogin = Button(canvas, bg=btnbg, text="Login",
                       font=("Helvetica Rounded", 14), command=login, width=11)
-    btnLogin.place(relx=.5, rely=.64, anchor=CENTER)
+    btnLogin.place(relx=.5, rely=.85, anchor=CENTER)
 
     entPass.bind("<Return>",  login)
+    entPass.bind("<FocusIn>", showSHIcon)
+    entPass.bind("<FocusOut>", hideSHIcon)
 
 
 # main menu
 def firstMenu():
-    canvas2 = Canvas(root, width=1000, height=800,
+    canvas2 = Canvas(root, width=700, height=500,
                      bg=cnvsbg, highlightthickness=0, highlightbackground=cnvshl)
     canvas2.place(relx=.5, rely=.5, anchor=CENTER)
 
     btnUsers = Button(canvas2, bg=btnbg, text="USERS",
                       font=("Helvetica Rounded", 34,), width=20)
-    btnUsers.place(relx=.5, rely=.3, anchor=CENTER)
+    btnUsers.place(relx=.5, rely=.2, anchor=CENTER)
 
     btnBooks = Button(canvas2, bg=btnbg, text="BOOKS",
                       font=("Helvetica Rounded", 34), width=20)
@@ -110,7 +144,7 @@ def firstMenu():
 
     btnIssue = Button(canvas2, bg=btnbg, text="ISSUE A BOOK",
                       font=("Helvetica Rounded", 34), width=20)
-    btnIssue.place(relx=.5, rely=.7, anchor=CENTER)
+    btnIssue.place(relx=.5, rely=.8, anchor=CENTER)
 
 
 pageDecider(pageStatus)
