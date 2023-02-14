@@ -1,7 +1,8 @@
 from tkinter import *
 import tkinter.messagebox
 from PIL import Image, ImageTk
-
+import sqlite3
+from tkinter import ttk
 # general attributes
 pageStatus = 2
 isHidden = True
@@ -134,8 +135,39 @@ def firstMenu():
                      bg=cnvsbg, highlightthickness=0, highlightbackground=cnvshl)
     canvas2.place(relx=.5, rely=.5, anchor=CENTER)
 
+    def openUsers():
+        global pageStatus
+        pageStatus = 3
+        canvas2.destroy()
+        canvas3 = Canvas(root, width=1200, height=800, bg=cnvsbg,
+                         highlightthickness=2, highlightbackground=cnvshl)
+        canvas3.place(relx=.5, rely=.5, anchor=CENTER)
+
+        treeUsers = ttk.Treeview(canvas3)
+        treeUsers["columns"] = ("ID", "Name", "Last Name",
+                                "Phone Number", "Reg Date")
+
+        treeUsers.column("#0", width=NO, minwidth=NO)
+        treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
+        treeUsers.column("Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("Phone Number", anchor=W, width=160, minwidth=100)
+        treeUsers.column("Reg Date", anchor=W, width=120, minwidth=80)
+
+        treeUsers.heading("#0", text="", anchor=W)
+        treeUsers.heading("ID", anchor=CENTER, text="ID")
+        treeUsers.heading("Name", anchor=W, text="Name")
+        treeUsers.heading("Last Name", anchor=W, text="Last Name")
+        treeUsers.heading("Phone Number", anchor=W, text="Phone Number")
+        treeUsers.heading("Reg Date", anchor=W, text="Reg Date")
+
+        treeUsers.insert(parent="", index='end', iid=0, text="",
+                         values=[1, "Ilia", "Valaei", "09307637377", "14-2-2023"])
+
+        treeUsers.place(rely=.2, relx=.5, anchor=CENTER)
+
     btnUsers = Button(canvas2, bg=btnbg, text="USERS",
-                      font=("Helvetica Rounded", 34,), width=20)
+                      font=("Helvetica Rounded", 34,), width=20, command=openUsers)
     btnUsers.place(relx=.5, rely=.2, anchor=CENTER)
 
     btnBooks = Button(canvas2, bg=btnbg, text="BOOKS",
@@ -146,6 +178,18 @@ def firstMenu():
                       font=("Helvetica Rounded", 34), width=20)
     btnIssue.place(relx=.5, rely=.8, anchor=CENTER)
 
+# users menu
+
+
+def usersMenu():
+    usersDB = sqlite3.connect("user.db")
+    cursor = usersDB.cursor()
+
+    usersDB.commit()
+    usersDB.close()
+
+
+usersMenu()
 
 pageDecider(pageStatus)
 root.mainloop()
