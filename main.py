@@ -3,6 +3,7 @@ import tkinter.messagebox
 from PIL import Image, ImageTk
 import sqlite3
 from tkinter import ttk
+import pandas as pd
 # general attributes
 pageStatus = 2
 isHidden = True
@@ -48,6 +49,8 @@ def pageDecider(value):
     elif value == 2:
         firstMenu()
         print(value)
+    elif value == 3:
+        usersMenu()
 
 
 # login page and the first page of program
@@ -139,32 +142,7 @@ def firstMenu():
         global pageStatus
         pageStatus = 3
         canvas2.destroy()
-        canvas3 = Canvas(root, width=1200, height=800, bg=cnvsbg,
-                         highlightthickness=2, highlightbackground=cnvshl)
-        canvas3.place(relx=.5, rely=.5, anchor=CENTER)
-
-        treeUsers = ttk.Treeview(canvas3)
-        treeUsers["columns"] = ("ID", "Name", "Last Name",
-                                "Phone Number", "Reg Date")
-
-        treeUsers.column("#0", width=NO, minwidth=NO)
-        treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
-        treeUsers.column("Name", anchor=W, width=160, minwidth=100)
-        treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
-        treeUsers.column("Phone Number", anchor=W, width=160, minwidth=100)
-        treeUsers.column("Reg Date", anchor=W, width=120, minwidth=80)
-
-        treeUsers.heading("#0", text="", anchor=W)
-        treeUsers.heading("ID", anchor=CENTER, text="ID")
-        treeUsers.heading("Name", anchor=W, text="Name")
-        treeUsers.heading("Last Name", anchor=W, text="Last Name")
-        treeUsers.heading("Phone Number", anchor=W, text="Phone Number")
-        treeUsers.heading("Reg Date", anchor=W, text="Reg Date")
-
-        treeUsers.insert(parent="", index='end', iid=0, text="",
-                         values=[1, "Ilia", "Valaei", "09307637377", "14-2-2023"])
-
-        treeUsers.place(rely=.2, relx=.5, anchor=CENTER)
+        usersMenu()
 
     btnUsers = Button(canvas2, bg=btnbg, text="USERS",
                       font=("Helvetica Rounded", 34,), width=20, command=openUsers)
@@ -182,14 +160,66 @@ def firstMenu():
 
 
 def usersMenu():
-    usersDB = sqlite3.connect("user.db")
-    cursor = usersDB.cursor()
+    canvas3 = Canvas(root, width=1200, height=800, bg=cnvsbg,
+                     highlightthickness=2, highlightbackground=cnvshl)
+    canvas3.place(relx=.5, rely=.5, anchor=CENTER)
 
-    usersDB.commit()
-    usersDB.close()
+    frmUsers = LabelFrame(canvas3, text="USERS", bd=2,
+                          bg=cnvsbg, width=1000, height=550)
+    frmUsers.place(rely=.4, relx=.5, anchor=CENTER)
 
+    frmUsersOption = LabelFrame(canvas3, text="OPTIONS", bd=2,
+                                bg=cnvsbg, width=475, height=150)
+    frmUsersOption.place(relx=.281, rely=.86, anchor=CENTER)
+    # options
+    btnAddUser = Button(frmUsersOption, text="ADD",
+                        bg=btnbg, font=("Helvetica Rounded", 12))
+    btnAddUser.place(relx=.3, rely=.5, anchor=CENTER)
 
-usersMenu()
+    btnDelUser = Button(frmUsersOption, text="REMOVE",
+                        bg=btnbg, font=("Helvetica Rounded", 12))
+    btnDelUser.place(relx=.7, rely=.5, anchor=CENTER)
+    # options end
+
+    frmSortUsers = LabelFrame(canvas3, text="SORT OPTIONS", bd=2,
+                              bg=cnvsbg, width=475, height=150)
+    frmSortUsers.place(relx=.719, rely=.86, anchor=CENTER)
+    # sort options
+
+    treeUsers = ttk.Treeview(frmUsers, height=23)
+    treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
+                            "Phone Number", "Reg Date")
+
+    treeUsers.column("#0", width=NO, minwidth=NO)
+    treeUsers.column("Membership ID", anchor=CENTER, width=120, minwidth=100)
+    treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
+    treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
+    treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
+    treeUsers.column("Phone Number", anchor=CENTER, width=160, minwidth=100)
+    treeUsers.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
+
+    treeUsers.heading("#0", text="", anchor=W)
+    treeUsers.heading("Membership ID", anchor=CENTER, text="Membership ID")
+    treeUsers.heading("First Name", anchor=W, text="First Name")
+    treeUsers.heading("Last Name", anchor=W, text="Last Name")
+    treeUsers.heading("ID", anchor=CENTER, text="ID")
+    treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
+    treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
+
+    dfUsers = pd.read_excel(
+        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing")
+
+    iidCount = 0
+    for record in dfUsers.values:
+        record[0] = record[0][1:]
+        record[3] = record[3][1:]
+        record[4] = record[4][1:]
+        treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                         values=list(record))
+        iidCount += 1
+
+    treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
+
 
 pageDecider(pageStatus)
 root.mainloop()
