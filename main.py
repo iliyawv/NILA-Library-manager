@@ -5,8 +5,9 @@ import sqlite3
 from tkinter import ttk
 import pandas as pd
 # general attributes
-pageStatus = 1
+pageStatus = 3
 isHidden = True
+dbsort = "NONE"
 
 # color pallete
 entfg = "#695f64"
@@ -137,6 +138,7 @@ def firstMenu():
     canvas2 = Canvas(root, width=700, height=500,
                      bg=cnvsbg, highlightthickness=2, highlightbackground=cnvshl)
     canvas2.place(relx=.5, rely=.5, anchor=CENTER)
+    global openUsers
 
     def openUsers():
         BtnLogout.destroy()
@@ -198,11 +200,11 @@ def usersMenu():
                                 bg=cnvsbg, width=475, height=150, font=("Helvetica Rounded", 10))
     frmUsersOption.place(relx=.281, rely=.86, anchor=CENTER)
     # options
-    btnAddUser = Button(frmUsersOption, text="ADD",
+    btnAddUser = Button(frmUsersOption, text="Add",
                         bg=btnbg, font=("Helvetica Rounded", 12))
     btnAddUser.place(relx=.3, rely=.5, anchor=CENTER)
 
-    btnDelUser = Button(frmUsersOption, text="REMOVE",
+    btnDelUser = Button(frmUsersOption, text="Remove",
                         bg=btnbg, font=("Helvetica Rounded", 12))
     btnDelUser.place(relx=.7, rely=.5, anchor=CENTER)
     # options end
@@ -211,6 +213,53 @@ def usersMenu():
                               bg=cnvsbg, width=475, height=150, font=("Helvetica Rounded", 10))
     frmSortUsers.place(relx=.719, rely=.86, anchor=CENTER)
     # sort options
+    global dfUsers
+    dfUsers = pd.read_excel(
+        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing")
+
+    def sort(type):
+        global dfUsers
+        global dbsort
+        dbsort = type
+        if type == "Name":
+            dfUsers = dfUsers.sort_values(by="NAME", ascending=True)
+        elif type == "Last Name":
+            dfUsers = dfUsers.sort_values(by="LAST NAME", ascending=True)
+        elif type == "memID":
+            dfUsers = dfUsers.sort_values(by="Membership ID", ascending=True)
+        elif type == "RegDate":
+            dfUsers = dfUsers.sort_values(by="DATE", ascending=True)
+        print(dfUsers)
+
+        dfUsers.to_excel(
+            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+
+        BtnBackMenu.destroy()
+        canvas3.destroy()
+        usersMenu()
+
+    global dbsort
+    clicked = StringVar()
+    clicked.set(dbsort)
+    optmnSort = OptionMenu(frmSortUsers, clicked, "Name",
+                           "Last Name",
+                           "Membership ID",
+                           "RegDate",)
+    optmnSort.configure(bg=btnbg, highlightbackground=cnvsbg)
+    optmnSort.place(relx=.55, rely=.3, anchor=CENTER)
+
+    lblSort = Label(frmSortUsers, text="sort by:", bg=cnvsbg,
+                    font=("Helvetica Rounded", 12))
+    lblSort.place(relx=.35, rely=.3, anchor=CENTER)
+
+    def doSort():
+        sort(clicked.get())
+
+    btnSort = Button(frmSortUsers, text="sort",
+                     bg=btnbg, font=("Helvetica Rounded", 12), command=doSort, width=15)
+    btnSort.place(relx=.46, rely=.7, anchor=CENTER)
+
+    # sort options end
 
     scrlTree = Scrollbar(frmUsers)
     scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.9133)
@@ -238,17 +287,12 @@ def usersMenu():
     treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
     treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
 
-    dfUsers = pd.read_excel(
-        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing")
-
     treeUsers.tag_configure("oddrow", background=entbg)
     treeUsers.tag_configure("evenrow", background=btnbg)
 
     iidCount = 0
     for record in dfUsers.values:
-        record[0] = record[0][1:]
-        record[3] = record[3][1:]
-        record[4] = record[4][1:]
+
         if iidCount % 2 == 1:
             treeUsers.insert(parent="", index='end', iid=iidCount, text="",
                              values=list(record), tags="oddrow")
