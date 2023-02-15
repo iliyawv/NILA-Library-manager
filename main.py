@@ -5,7 +5,7 @@ import sqlite3
 from tkinter import ttk
 import pandas as pd
 # general attributes
-pageStatus = 2
+pageStatus = 1
 isHidden = True
 
 # color pallete
@@ -135,14 +135,29 @@ def loginPage():
 # main menu
 def firstMenu():
     canvas2 = Canvas(root, width=700, height=500,
-                     bg=cnvsbg, highlightthickness=0, highlightbackground=cnvshl)
+                     bg=cnvsbg, highlightthickness=2, highlightbackground=cnvshl)
     canvas2.place(relx=.5, rely=.5, anchor=CENTER)
 
     def openUsers():
+        BtnLogout.destroy()
         global pageStatus
         pageStatus = 3
         canvas2.destroy()
         usersMenu()
+
+    def logout():
+        boolLogout = tkinter.messagebox.askyesno(
+            title="Log Out", message="Do You want to logout")
+        if boolLogout == True:
+            BtnLogout.destroy()
+            canvas2.destroy()
+            loginPage()
+            global pageStatus
+            pageStatus = 1
+
+    BtnLogout = Button(root, text="Log Out",
+                       bg=btnbg, font=("Helvetica Rounded", 12), command=logout)
+    BtnLogout.place(relx=.05, rely=.05, anchor=CENTER)
 
     btnUsers = Button(canvas2, bg=btnbg, text="USERS",
                       font=("Helvetica Rounded", 34,), width=20, command=openUsers)
@@ -164,12 +179,23 @@ def usersMenu():
                      highlightthickness=2, highlightbackground=cnvshl)
     canvas3.place(relx=.5, rely=.5, anchor=CENTER)
 
+    def backToMenu():
+        BtnBackMenu.destroy()
+        canvas3.destroy()
+        firstMenu()
+        global pageStatus
+        pageStatus = 2
+
+    BtnBackMenu = Button(root, text="BACK",
+                         bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
+    BtnBackMenu.place(relx=.05, rely=.05, anchor=CENTER)
+
     frmUsers = LabelFrame(canvas3, text="USERS", bd=2,
-                          bg=cnvsbg, width=1000, height=550)
+                          bg=cnvsbg, width=1000, height=550, font=("Helvetica Rounded", 10))
     frmUsers.place(rely=.4, relx=.5, anchor=CENTER)
 
     frmUsersOption = LabelFrame(canvas3, text="OPTIONS", bd=2,
-                                bg=cnvsbg, width=475, height=150)
+                                bg=cnvsbg, width=475, height=150, font=("Helvetica Rounded", 10))
     frmUsersOption.place(relx=.281, rely=.86, anchor=CENTER)
     # options
     btnAddUser = Button(frmUsersOption, text="ADD",
@@ -182,13 +208,19 @@ def usersMenu():
     # options end
 
     frmSortUsers = LabelFrame(canvas3, text="SORT OPTIONS", bd=2,
-                              bg=cnvsbg, width=475, height=150)
+                              bg=cnvsbg, width=475, height=150, font=("Helvetica Rounded", 10))
     frmSortUsers.place(relx=.719, rely=.86, anchor=CENTER)
     # sort options
 
-    treeUsers = ttk.Treeview(frmUsers, height=23)
+    scrlTree = Scrollbar(frmUsers)
+    scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.9133)
+
+    treeUsers = ttk.Treeview(frmUsers, height=23,
+                             yscrollcommand=scrlTree.set)
     treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
                             "Phone Number", "Reg Date")
+
+    scrlTree.config(command=treeUsers.yview)
 
     treeUsers.column("#0", width=NO, minwidth=NO)
     treeUsers.column("Membership ID", anchor=CENTER, width=120, minwidth=100)
@@ -209,13 +241,20 @@ def usersMenu():
     dfUsers = pd.read_excel(
         'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing")
 
+    treeUsers.tag_configure("oddrow", background=entbg)
+    treeUsers.tag_configure("evenrow", background=btnbg)
+
     iidCount = 0
     for record in dfUsers.values:
         record[0] = record[0][1:]
         record[3] = record[3][1:]
         record[4] = record[4][1:]
-        treeUsers.insert(parent="", index='end', iid=iidCount, text="",
-                         values=list(record))
+        if iidCount % 2 == 1:
+            treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                             values=list(record), tags="oddrow")
+        else:
+            treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                             values=list(record), tag="evenrow")
         iidCount += 1
 
     treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
