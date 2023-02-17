@@ -192,16 +192,138 @@ def usersMenu():
                          bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
     BtnBackMenu.place(relx=.05, rely=.05, anchor=CENTER)
 
-    frmUsers = LabelFrame(canvas3, text="USERS", bd=2,
-                          bg=cnvsbg, width=1000, height=550, font=("Helvetica Rounded", 10))
-    frmUsers.place(rely=.4, relx=.5, anchor=CENTER)
+    def userList():
+        global frmUsers
+        frmUsers = LabelFrame(canvas3, text="USERS", bd=2,
+                              bg=cnvsbg, width=1000, height=400, font=("Helvetica Rounded", 10))
+        frmUsers.place(rely=.28, relx=.5, anchor=CENTER)
+        scrlTree = Scrollbar(frmUsers)
+        scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.854)
+        global treeUsers
+        treeUsers = ttk.Treeview(frmUsers, height=15,
+                                 yscrollcommand=scrlTree.set, selectmode="browse")
+        treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
+                                "Phone Number", "Reg Date")
 
+        scrlTree.config(command=treeUsers.yview)
+
+        treeUsers.column("#0", width=50, minwidth=40)
+        treeUsers.column("Membership ID", anchor=CENTER,
+                         width=120, minwidth=100)
+        treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
+        treeUsers.column("Phone Number", anchor=CENTER,
+                         width=160, minwidth=100)
+        treeUsers.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
+
+        treeUsers.heading("#0", text="", anchor=W)
+        treeUsers.heading("Membership ID", anchor=CENTER, text="Membership ID")
+        treeUsers.heading("First Name", anchor=W, text="First Name")
+        treeUsers.heading("Last Name", anchor=W, text="Last Name")
+        treeUsers.heading("ID", anchor=CENTER, text="ID")
+        treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
+        treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
+
+        treeUsers.tag_configure("oddrow", background=entbg)
+        treeUsers.tag_configure("evenrow", background=btnbg)
+
+        iidCount = 0
+        for record in dfUsers.values:
+
+            if iidCount % 2 == 1:
+                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                                 values=list(record), tags="oddrow")
+            else:
+                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                                 values=list(record), tag="evenrow")
+            iidCount += 1
+
+        treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
+
+        treeUsers.bind("<Double-1>", click)
+
+    def userEdit():
+        global frmEdit, entMemID, entName, entLName
+        frmEdit = LabelFrame(canvas3, text="EDIT", bd=2,
+                             bg=cnvsbg, width=1000, height=160, font=("Helvetica Rounded", 10))
+        frmEdit.place(relx=.5, rely=.65, anchor=CENTER)
+        lblMemID = Label(frmEdit, text="Name",
+                         font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblMemID.place(relx=.2, rely=.21, anchor=CENTER)
+        entMemID = Entry(frmEdit,
+                         font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entMemID.place(relx=.2, rely=.4, anchor=CENTER)
+        lblName = Label(frmEdit, text="Last Name",
+                        font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblName.place(relx=.5, rely=.21, anchor=CENTER)
+
+        entName = Entry(frmEdit,
+                        font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entName.place(relx=.5, rely=.4, anchor=CENTER)
+        lblLname = Label(frmEdit, text="Phone number",
+                         font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblLname.place(relx=.8, rely=.21, anchor=CENTER)
+
+        entLName = Entry(frmEdit,
+                         font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entLName.place(relx=.8, rely=.4, anchor=CENTER)
+        btnApply = Button(frmEdit, text="Apply",
+                          bg=btnbg, font=("Helvetica Rounded", 12), command=applyChanges)
+        btnApply.place(relx=.5, rely=.7, anchor=CENTER)
+
+    def applyChanges():
+        global entMemID, entName, entLName, id, dfUsers
+        temp1 = entMemID.get()
+        temp2 = entName.get()
+        temp3 = entLName.get()
+        if not (temp1 == "" or temp2 == "" or temp3 == ""):
+            for record in dfUsers.values:
+                if record[0] == id:
+                    if tkinter.messagebox.askyesno(title="Apply", message="do you wish to proceed?") == True:
+                        temp = record
+                        temp[1] = temp1
+                        temp[2] = temp2
+                        temp[4] = temp3
+                        dfUsers = dfUsers.replace(record, temp)
+                        print(id)
+                        sort(dbsort)
+                        break
+            else:
+                tkinter.messagebox.showerror(
+                    title="ERROR", message="choose a user to edit!")
+        else:
+            tkinter.messagebox.showerror(
+                title="ERROR", message="fields cant be empty")
+
+        entLName.delete(0,  END)
+        entName.delete(0,  END)
+        entMemID.delete(0,  END)
+
+    def deleteUser():
+        global values
+        
+
+    def click(e=""):
+
+        global treeUsers, entMemID, entName, entLName, id,values
+        selected = treeUsers.focus()
+        values = treeUsers.item(selected, "values")
+        entLName.delete(0,  END)
+        entName.delete(0,  END)
+        entMemID.delete(0,  END)
+        entLName.insert(0,  values[4])
+        entName.insert(0,  values[2])
+        entMemID.insert(0,  values[1])
+        id = values[0]
+    global id
+    id = 0
     frmUsersOption = LabelFrame(canvas3, text="OPTIONS", bd=2,
                                 bg=cnvsbg, width=475, height=150, font=("Helvetica Rounded", 10))
     frmUsersOption.place(relx=.281, rely=.86, anchor=CENTER)
     # options
     btnAddUser = Button(frmUsersOption, text="Add",
-                        bg=btnbg, font=("Helvetica Rounded", 12))
+                        bg=btnbg, font=("Helvetica Rounded", 12), command=click)
     btnAddUser.place(relx=.3, rely=.5, anchor=CENTER)
 
     btnDelUser = Button(frmUsersOption, text="Remove",
@@ -215,28 +337,30 @@ def usersMenu():
     # sort options
     global dfUsers
     dfUsers = pd.read_excel(
-        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing")
+        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
 
     def sort(type):
-        global dfUsers
+        global dfUsers, id
         global dbsort
         dbsort = type
         if type == "Name":
             dfUsers = dfUsers.sort_values(by="NAME", ascending=True)
         elif type == "Last Name":
             dfUsers = dfUsers.sort_values(by="LAST NAME", ascending=True)
-        elif type == "memID":
-            dfUsers = dfUsers.sort_values(by="Membership ID", ascending=True)
+        elif type == "Membership ID":
+            dfUsers = dfUsers.sort_values(by="Mem ID", ascending=True)
         elif type == "RegDate":
             dfUsers = dfUsers.sort_values(by="DATE", ascending=True)
-        print(dfUsers)
+        id = 0
 
         dfUsers.to_excel(
             excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
 
-        BtnBackMenu.destroy()
-        canvas3.destroy()
-        usersMenu()
+        frmUsers.destroy()
+        userList()
+
+    userList()
+    userEdit()
 
     global dbsort
     clicked = StringVar()
@@ -260,48 +384,6 @@ def usersMenu():
     btnSort.place(relx=.46, rely=.7, anchor=CENTER)
 
     # sort options end
-
-    scrlTree = Scrollbar(frmUsers)
-    scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.9133)
-
-    treeUsers = ttk.Treeview(frmUsers, height=23,
-                             yscrollcommand=scrlTree.set)
-    treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
-                            "Phone Number", "Reg Date")
-
-    scrlTree.config(command=treeUsers.yview)
-
-    treeUsers.column("#0", width=NO, minwidth=NO)
-    treeUsers.column("Membership ID", anchor=CENTER, width=120, minwidth=100)
-    treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
-    treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
-    treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
-    treeUsers.column("Phone Number", anchor=CENTER, width=160, minwidth=100)
-    treeUsers.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
-
-    treeUsers.heading("#0", text="", anchor=W)
-    treeUsers.heading("Membership ID", anchor=CENTER, text="Membership ID")
-    treeUsers.heading("First Name", anchor=W, text="First Name")
-    treeUsers.heading("Last Name", anchor=W, text="Last Name")
-    treeUsers.heading("ID", anchor=CENTER, text="ID")
-    treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
-    treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
-
-    treeUsers.tag_configure("oddrow", background=entbg)
-    treeUsers.tag_configure("evenrow", background=btnbg)
-
-    iidCount = 0
-    for record in dfUsers.values:
-
-        if iidCount % 2 == 1:
-            treeUsers.insert(parent="", index='end', iid=iidCount, text="",
-                             values=list(record), tags="oddrow")
-        else:
-            treeUsers.insert(parent="", index='end', iid=iidCount, text="",
-                             values=list(record), tag="evenrow")
-        iidCount += 1
-
-    treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
 
 
 pageDecider(pageStatus)
