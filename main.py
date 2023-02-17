@@ -301,12 +301,17 @@ def usersMenu():
         entMemID.delete(0,  END)
 
     def deleteUser():
-        global values
-        
+        global delValues
+        selected = treeUsers.focus()
+        delValues = treeUsers.item(selected, "values")
+
+        for index, record in enumerate(dfUsers.values):
+
+            print(index, record)
 
     def click(e=""):
 
-        global treeUsers, entMemID, entName, entLName, id,values
+        global treeUsers, entMemID, entName, entLName, id, values
         selected = treeUsers.focus()
         values = treeUsers.item(selected, "values")
         entLName.delete(0,  END)
@@ -316,6 +321,7 @@ def usersMenu():
         entName.insert(0,  values[2])
         entMemID.insert(0,  values[1])
         id = values[0]
+
     global id
     id = 0
     frmUsersOption = LabelFrame(canvas3, text="OPTIONS", bd=2,
@@ -327,7 +333,7 @@ def usersMenu():
     btnAddUser.place(relx=.3, rely=.5, anchor=CENTER)
 
     btnDelUser = Button(frmUsersOption, text="Remove",
-                        bg=btnbg, font=("Helvetica Rounded", 12))
+                        bg=btnbg, font=("Helvetica Rounded", 12), command=deleteUser)
     btnDelUser.place(relx=.7, rely=.5, anchor=CENTER)
     # options end
 
