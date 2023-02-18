@@ -201,13 +201,13 @@ def usersMenu():
         scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.854)
         global treeUsers
         treeUsers = ttk.Treeview(frmUsers, height=15,
-                                 yscrollcommand=scrlTree.set, selectmode="browse")
+                                 yscrollcommand=scrlTree.set)
         treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
                                 "Phone Number", "Reg Date")
 
         scrlTree.config(command=treeUsers.yview)
 
-        treeUsers.column("#0", width=50, minwidth=40)
+        treeUsers.column("#0", width=NO, minwidth=NO)
         treeUsers.column("Membership ID", anchor=CENTER,
                          width=120, minwidth=100)
         treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
@@ -301,13 +301,26 @@ def usersMenu():
         entMemID.delete(0,  END)
 
     def deleteUser():
-        global delValues
+        global delValues, dfUsers
         selected = treeUsers.focus()
         delValues = treeUsers.item(selected, "values")
 
         for index, record in enumerate(dfUsers.values):
-
-            print(index, record)
+            print(list(record), list(delValues))
+            if list(record) == list(delValues):
+                if tkinter.messagebox.askquestion("DELETE", "do you want to proceed?"):
+                    dfUsers.drop(index, inplace=True)
+                    print("d")
+                    sort(dbsort)
+                    dfUsers = pd.read_excel(
+                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="missing", dtype=str)
+                    dfUsers = dfUsers.fillna("s")
+                    break
+                else:
+                    break
+        else:
+            tkinter.messagebox.showerror(
+                title="ERROR", message="something wrong happened!")
 
     def click(e=""):
 
@@ -343,7 +356,8 @@ def usersMenu():
     # sort options
     global dfUsers
     dfUsers = pd.read_excel(
-        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
+        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="missing", dtype=str)
+    dfUsers = dfUsers.fillna("s")
 
     def sort(type):
         global dfUsers, id
