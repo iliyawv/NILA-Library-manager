@@ -308,13 +308,15 @@ def usersMenu():
         for index, record in enumerate(dfUsers.values):
             print(list(record), list(delValues))
             if list(record) == list(delValues):
-                if tkinter.messagebox.askquestion("DELETE", "do you want to proceed?"):
+                if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
                     dfUsers.drop(index, inplace=True)
                     print("d")
                     sort(dbsort)
                     dfUsers = pd.read_excel(
-                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="missing", dtype=str)
-                    dfUsers = dfUsers.fillna("s")
+                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
+                    dfUsers = dfUsers.fillna("Missing")
+                    tkinter.messagebox.showinfo(
+                        title="Successful", message=f"user {record[1]} {record[2]} removed!")
                     break
                 else:
                     break
@@ -356,8 +358,8 @@ def usersMenu():
     # sort options
     global dfUsers
     dfUsers = pd.read_excel(
-        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="missing", dtype=str)
-    dfUsers = dfUsers.fillna("s")
+        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
+    dfUsers = dfUsers.fillna("Missing")
 
     def sort(type):
         global dfUsers, id
