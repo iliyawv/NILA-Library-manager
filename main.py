@@ -4,6 +4,8 @@ from PIL import Image, ImageTk
 import sqlite3
 from tkinter import ttk
 import pandas as pd
+import random
+import datetime as dt
 # general attributes
 pageStatus = 3
 isHidden = True
@@ -286,7 +288,6 @@ def usersMenu():
                         temp[2] = temp2
                         temp[4] = temp3
                         dfUsers = dfUsers.replace(record, temp)
-                        print(id)
                         sort(dbsort)
                         break
             else:
@@ -306,11 +307,9 @@ def usersMenu():
         delValues = treeUsers.item(selected, "values")
 
         for index, record in enumerate(dfUsers.values):
-            print(list(record), list(delValues))
             if list(record) == list(delValues):
                 if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
-                    dfUsers.drop(index, inplace=True)
-                    print("d")
+                    dfUsers.drop(index=index, inplace=True)
                     sort(dbsort)
                     dfUsers = pd.read_excel(
                         'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
@@ -323,6 +322,83 @@ def usersMenu():
         else:
             tkinter.messagebox.showerror(
                 title="ERROR", message="something wrong happened!")
+
+    def UserAdd():
+        global dfUsers
+
+        addWindow = Toplevel(root, bg=cnvsbg, takefocus=True)
+        addWindow.title("Add User")
+        addWindow.geometry("800x280")
+        addWindow.resizable(False, False)
+        addWindow.wm_iconphoto(False, photo)
+
+        def saveUser():
+            global dfUsers
+            if tkinter.messagebox.askyesno(title="SAVE", message="do you wish to proceed?") == True:
+                id = entAddID.get()
+                lastName = entAddLastName.get()
+                Name = entAddName.get()
+                phone = entAddPhone.get()
+                memidList = set()
+
+                memID = str(random.randint(100000, 999999))
+                for record in dfUsers.values:
+                    memidList.add(record[0])
+                    if record[3] == id:
+                        tkinter.messagebox.showerror(
+                            title="ERROR", message=f"this user with ID:{id}, already exists!")
+                        break
+                else:
+                    while (True):
+                        memid = str(random.randint(100000, 999999))
+                        if memid not in memidList:
+                            newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
+                                                      "NUMBER": [phone], "DATE": [dt.datetime.now().strftime('%m/%d/%Y')]})
+                            dfUsers = dfUsers.append(newUserdf)
+                            sort(dbsort)
+                            break
+
+        lblfrmAddUser = LabelFrame(
+            addWindow, text="Add", width=700, height=200, font=("Helvetica Rounded", 10), bg=cnvsbg, bd=2)
+        lblfrmAddUser.place(relx=.5, rely=.4, anchor=CENTER)
+
+        entAddName = Entry(lblfrmAddUser,
+                           font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entAddName.place(relx=.3, rely=.2, anchor=CENTER)
+
+        lblAddName = Label(lblfrmAddUser, text="Name",
+                           font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblAddName.place(relx=.07, rely=.2, anchor=CENTER)
+
+        entAddLastName = Entry(lblfrmAddUser,
+                               font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entAddLastName.place(relx=.3, rely=.45, anchor=CENTER)
+
+        lblAddLastName = Label(lblfrmAddUser, text="Last Name",
+                               font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblAddLastName.place(relx=.07, rely=.45, anchor=CENTER)
+
+        entAddID = Entry(lblfrmAddUser,
+                         font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entAddID.place(relx=.8, rely=.2, anchor=CENTER)
+
+        lblAddID = Label(lblfrmAddUser, text="ID",
+                         font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblAddID.place(relx=.55, rely=.2, anchor=CENTER)
+
+        entAddPhone = Entry(lblfrmAddUser,
+                            font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+        entAddPhone.place(relx=.8, rely=.45, anchor=CENTER)
+
+        lblAddPhone = Label(lblfrmAddUser, text="Phone Number",
+                            font=("Helvetica Rounded", 12), bg=cnvsbg)
+        lblAddPhone.place(relx=.55, rely=.45, anchor=CENTER)
+
+        btnSave = Button(lblfrmAddUser, text="Save",
+                         bg=btnbg, font=("Helvetica Rounded", 12), command=saveUser)
+        btnSave.place(relx=.5, rely=.85, anchor=CENTER)
+
+        addWindow.grab_set()
 
     def click(e=""):
 
@@ -344,7 +420,7 @@ def usersMenu():
     frmUsersOption.place(relx=.281, rely=.86, anchor=CENTER)
     # options
     btnAddUser = Button(frmUsersOption, text="Add",
-                        bg=btnbg, font=("Helvetica Rounded", 12), command=click)
+                        bg=btnbg, font=("Helvetica Rounded", 12), command=UserAdd)
     btnAddUser.place(relx=.3, rely=.5, anchor=CENTER)
 
     btnDelUser = Button(frmUsersOption, text="Remove",
@@ -376,7 +452,7 @@ def usersMenu():
         id = 0
 
         dfUsers.to_excel(
-            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=True, header=True)
 
         frmUsers.destroy()
         userList()
