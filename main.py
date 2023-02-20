@@ -354,8 +354,10 @@ def usersMenu():
                         if memid not in memidList:
                             newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
                                                       "NUMBER": [phone], "DATE": [dt.datetime.now().strftime('%m/%d/%Y')]})
-                            dfUsers = dfUsers.append(newUserdf)
+                            dfUsers = pd.concat(
+                                [dfUsers, newUserdf], ignore_index=True)
                             sort(dbsort)
+                            print(dfUsers)
                             break
 
         lblfrmAddUser = LabelFrame(
@@ -452,7 +454,7 @@ def usersMenu():
         id = 0
 
         dfUsers.to_excel(
-            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=True, header=True)
+            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
 
         frmUsers.destroy()
         userList()
