@@ -211,49 +211,49 @@ def usersMenu():
         frmUsers.place(rely=.28, relx=.5, anchor=CENTER)
         scrlTree = Scrollbar(frmUsers)
         scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.854)
-        global treeBooks
-        treeBooks = ttk.Treeview(frmUsers, height=15,
+        global dfUsers, treeUsers
+        treeUsers = ttk.Treeview(frmUsers, height=15,
                                  yscrollcommand=scrlTree.set)
-        treeBooks["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
+        treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
                                 "Phone Number", "Reg Date")
 
-        scrlTree.config(command=treeBooks.yview)
+        scrlTree.config(command=treeUsers.yview)
 
-        treeBooks.column("#0", width=NO, minwidth=NO)
-        treeBooks.column("Membership ID", anchor=CENTER,
+        treeUsers.column("#0", width=NO, minwidth=NO)
+        treeUsers.column("Membership ID", anchor=CENTER,
                          width=120, minwidth=100)
-        treeBooks.column("First Name", anchor=W, width=160, minwidth=100)
-        treeBooks.column("Last Name", anchor=W, width=160, minwidth=100)
-        treeBooks.column("ID", anchor=CENTER, width=80, minwidth=60)
-        treeBooks.column("Phone Number", anchor=CENTER,
+        treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
+        treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
+        treeUsers.column("Phone Number", anchor=CENTER,
                          width=160, minwidth=100)
-        treeBooks.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
+        treeUsers.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
 
-        treeBooks.heading("#0", text="", anchor=W)
-        treeBooks.heading("Membership ID", anchor=CENTER, text="Membership ID")
-        treeBooks.heading("First Name", anchor=W, text="First Name")
-        treeBooks.heading("Last Name", anchor=W, text="Last Name")
-        treeBooks.heading("ID", anchor=CENTER, text="ID")
-        treeBooks.heading("Phone Number", anchor=CENTER, text="Phone Number")
-        treeBooks.heading("Reg Date", anchor=CENTER, text="Reg Date")
+        treeUsers.heading("#0", text="", anchor=W)
+        treeUsers.heading("Membership ID", anchor=CENTER, text="Membership ID")
+        treeUsers.heading("First Name", anchor=W, text="First Name")
+        treeUsers.heading("Last Name", anchor=W, text="Last Name")
+        treeUsers.heading("ID", anchor=CENTER, text="ID")
+        treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
+        treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
 
-        treeBooks.tag_configure("oddrow", background=entbg)
-        treeBooks.tag_configure("evenrow", background=btnbg)
+        treeUsers.tag_configure("oddrow", background=entbg)
+        treeUsers.tag_configure("evenrow", background=btnbg)
 
         iidCount = 0
         for record in dfUsers.values:
 
             if iidCount % 2 == 1:
-                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
                                  values=list(record), tags="oddrow")
             else:
-                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
                                  values=list(record), tag="evenrow")
             iidCount += 1
 
-        treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
+        treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
 
-        treeBooks.bind("<Double-1>", click)
+        treeUsers.bind("<Double-1>", click)
 
     def userEdit():
         global frmEdit, entMemID, entName, entLName
@@ -313,8 +313,8 @@ def usersMenu():
 
     def deleteUser():
         global delValues, dfUsers
-        selected = treeBooks.focus()
-        delValues = treeBooks.item(selected, "values")
+        selected = treeUsers.focus()
+        delValues = treeUsers.item(selected, "values")
 
         for index, record in enumerate(dfUsers.values):
             if list(record) == list(delValues):
@@ -367,7 +367,7 @@ def usersMenu():
                             dfUsers = pd.concat(
                                 [dfUsers, newUserdf], ignore_index=True)
                             sort(dbsort)
-                            print(dfUsers)
+
                             break
 
         lblfrmAddUser = LabelFrame(
@@ -414,9 +414,9 @@ def usersMenu():
 
     def click(e=""):
 
-        global treeBooks, entMemID, entName, entLName, id, values
-        selected = treeBooks.focus()
-        values = treeBooks.item(selected, "values")
+        global treeUsers, entMemID, entName, entLName, id, values
+        selected = treeUsers.focus()
+        values = treeUsers.item(selected, "values")
         entLName.delete(0,  END)
         entName.delete(0,  END)
         entMemID.delete(0,  END)
@@ -512,32 +512,30 @@ def booksMenu():
             addWindow.resizable(False, False)
             addWindow.wm_iconphoto(False, photo)
 
-            def saveUser():
+            def saveBook():
+                global dfBooks
                 if tkinter.messagebox.askyesno(title="SAVE", message="do you wish to proceed?") == True:
-                    id = entAddID.get()
-                    lastName = entAddLastName.get()
-                    Name = entAddName.get()
-                    phone = entAddPhone.get()
-                    memidList = set()
+                    title = entAddTitle.get()
+                    author = entAddAuthor.get()
+                    publisher = entAddPublisher.get()
+                    publishDate = entAddPublishDate.get()
 
-                    memID = str(random.randint(100000, 999999))
-                    for record in dfUsers.values:
-                        memidList.add(record[0])
-                        if record[3] == id:
-                            tkinter.messagebox.showerror(
-                                title="ERROR", message=f"this user with ID:{id}, already exists!")
-                            break
-                    else:
-                        while (True):
-                            memid = str(random.randint(100000, 999999))
-                            if memid not in memidList:
-                                newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
-                                                          "NUMBER": [phone], "DATE": [dt.datetime.now().strftime('%m/%d/%Y')]})
-                                dfUsers = pd.concat(
-                                    [dfUsers, newUserdf], ignore_index=True)
-                                sort(dbsort)
-                                print(dfUsers)
+                    while True:
+                        bookID = str(random.randint(1000000, 9999999))
+                        for record in dfBooks.values:
+                            if record[0] == bookID:
                                 break
+                        else:
+                            break
+
+                    newDf = pd.DataFrame({"Book ID": [bookID], "Title": [title], "Author": [author],
+                                         "Publisher": [publisher], "publish Date": [publishDate]})
+                    dfBooks = pd.concat([dfBooks, newDf], ignore_index=True)
+                    dfBooks.sort_values(
+                        by="Publisher", inplace=True, ascending=True)
+                    dfBooks.to_excel(
+                        'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                    booksList()
 
             lblfrmAddBook = LabelFrame(
                 addWindow, text="Add", width=700, height=200, font=("Helvetica Rounded", 10), bg=cnvsbg, bd=2)
@@ -576,10 +574,34 @@ def booksMenu():
             lblAddPublishDate.place(relx=.55, rely=.45, anchor=CENTER)
 
             btnSave = Button(lblfrmAddBook, text="Save",
-                             bg=btnbg, font=("Helvetica Rounded", 12), command=saveUser)
+                             bg=btnbg, font=("Helvetica Rounded", 12), command=saveBook)
             btnSave.place(relx=.5, rely=.85, anchor=CENTER)
 
             addWindow.grab_set()
+
+        def deleteBook():
+            global dfBooks
+            selected = treeBooks.focus()
+            delValues = treeBooks.item(selected, "values")
+
+            for index, record in enumerate(dfBooks.values):
+                if list(record) == list(delValues):
+                    if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
+                        dfBooks.drop(index=index, inplace=True)
+                        dfBooks.to_excel(
+                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                        dfBooks = pd.read_excel(
+                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
+                        dfBooks = dfBooks.fillna("Missing")
+                        tkinter.messagebox.showinfo(
+                            title="Successful", message=f"book {record[1]} removed!")
+                        booksList()
+                        break
+                    else:
+                        break
+            else:
+                tkinter.messagebox.showerror(
+                    title="ERROR", message="something wrong happened!")
 
         BtnBackMenu = Button(root, text="BACK",
                              bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
@@ -602,7 +624,7 @@ def booksMenu():
         btnAddBook.place(rely=.3, relx=.5, anchor=CENTER)
 
         btnRemoveBook = Button(lblfrmOptions, text="REMOVE",
-                               bg=btnbg, font=("Helvetica Rounded", 12), width=20)
+                               bg=btnbg, font=("Helvetica Rounded", 12), width=20, command=deleteBook)
         btnRemoveBook.place(rely=.65, relx=.5, anchor=CENTER)
 
         def booksList():
@@ -617,7 +639,7 @@ def booksMenu():
             treeBooks = ttk.Treeview(lblfrmBooks, height=15,
                                      yscrollcommand=scrlTree.set)
             treeBooks["columns"] = ("Book ID", "Title", "Author",
-                                    "publisher", "publish Date")
+                                    "Publisher", "Publish Date")
 
             scrlTree.config(command=treeBooks.yview)
 
@@ -626,17 +648,17 @@ def booksMenu():
                              width=120, minwidth=100)
             treeBooks.column("Title", anchor=W, width=160, minwidth=100)
             treeBooks.column("Author", anchor=W, width=160, minwidth=100)
-            treeBooks.column("publisher", anchor=CENTER, width=80, minwidth=60)
-            treeBooks.column("publish Date", anchor=CENTER,
+            treeBooks.column("Publisher", anchor=CENTER, width=80, minwidth=60)
+            treeBooks.column("Publish Date", anchor=CENTER,
                              width=160, minwidth=100)
 
             treeBooks.heading("#0", text="", anchor=W)
             treeBooks.heading("Book ID", anchor=CENTER, text="Book ID")
             treeBooks.heading("Title", anchor=W, text="Title")
             treeBooks.heading("Author", anchor=W, text="Author")
-            treeBooks.heading("publisher", anchor=CENTER, text="publisher")
-            treeBooks.heading("publish Date", anchor=CENTER,
-                              text="publish Date")
+            treeBooks.heading("Publisher", anchor=CENTER, text="Publisher")
+            treeBooks.heading("Publish Date", anchor=CENTER,
+                              text="Publish Date")
 
             treeBooks.tag_configure("oddrow", background=entbg)
             treeBooks.tag_configure("evenrow", background=btnbg)
