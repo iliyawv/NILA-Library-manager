@@ -7,7 +7,7 @@ import pandas as pd
 import random
 import datetime as dt
 # general attributes
-pageStatus = 3
+pageStatus = 4
 isHidden = True
 dbsort = "NONE"
 
@@ -54,6 +54,8 @@ def pageDecider(value):
         print(value)
     elif value == 3:
         usersMenu()
+    elif value == 4:
+        booksMenu()
 
 
 # login page and the first page of program
@@ -134,8 +136,9 @@ def loginPage():
     entPass.bind("<FocusIn>", showSHIcon)
     entPass.bind("<FocusOut>", hideSHIcon)
 
-
 # main menu
+
+
 def firstMenu():
     canvas2 = Canvas(root, width=700, height=500,
                      bg=cnvsbg, highlightthickness=2, highlightbackground=cnvshl)
@@ -148,6 +151,13 @@ def firstMenu():
         pageStatus = 3
         canvas2.destroy()
         usersMenu()
+
+    def openBooks():
+        BtnLogout.destroy()
+        global pageStatus
+        pageStatus = 4
+        canvas2.destroy()
+        booksMenu()
 
     def logout():
         boolLogout = tkinter.messagebox.askyesno(
@@ -168,7 +178,7 @@ def firstMenu():
     btnUsers.place(relx=.5, rely=.2, anchor=CENTER)
 
     btnBooks = Button(canvas2, bg=btnbg, text="BOOKS",
-                      font=("Helvetica Rounded", 34), width=20)
+                      font=("Helvetica Rounded", 34), width=20, command=openBooks)
     btnBooks.place(relx=.5, rely=.5, anchor=CENTER)
 
     btnIssue = Button(canvas2, bg=btnbg, text="ISSUE A BOOK",
@@ -201,49 +211,49 @@ def usersMenu():
         frmUsers.place(rely=.28, relx=.5, anchor=CENTER)
         scrlTree = Scrollbar(frmUsers)
         scrlTree.place(relx=.911, rely=.5, anchor=CENTER, relheight=.854)
-        global treeUsers
-        treeUsers = ttk.Treeview(frmUsers, height=15,
+        global treeBooks
+        treeBooks = ttk.Treeview(frmUsers, height=15,
                                  yscrollcommand=scrlTree.set)
-        treeUsers["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
+        treeBooks["columns"] = ("Membership ID", "First Name", "Last Name", "ID",
                                 "Phone Number", "Reg Date")
 
-        scrlTree.config(command=treeUsers.yview)
+        scrlTree.config(command=treeBooks.yview)
 
-        treeUsers.column("#0", width=NO, minwidth=NO)
-        treeUsers.column("Membership ID", anchor=CENTER,
+        treeBooks.column("#0", width=NO, minwidth=NO)
+        treeBooks.column("Membership ID", anchor=CENTER,
                          width=120, minwidth=100)
-        treeUsers.column("First Name", anchor=W, width=160, minwidth=100)
-        treeUsers.column("Last Name", anchor=W, width=160, minwidth=100)
-        treeUsers.column("ID", anchor=CENTER, width=80, minwidth=60)
-        treeUsers.column("Phone Number", anchor=CENTER,
+        treeBooks.column("First Name", anchor=W, width=160, minwidth=100)
+        treeBooks.column("Last Name", anchor=W, width=160, minwidth=100)
+        treeBooks.column("ID", anchor=CENTER, width=80, minwidth=60)
+        treeBooks.column("Phone Number", anchor=CENTER,
                          width=160, minwidth=100)
-        treeUsers.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
+        treeBooks.column("Reg Date", anchor=CENTER, width=120, minwidth=80)
 
-        treeUsers.heading("#0", text="", anchor=W)
-        treeUsers.heading("Membership ID", anchor=CENTER, text="Membership ID")
-        treeUsers.heading("First Name", anchor=W, text="First Name")
-        treeUsers.heading("Last Name", anchor=W, text="Last Name")
-        treeUsers.heading("ID", anchor=CENTER, text="ID")
-        treeUsers.heading("Phone Number", anchor=CENTER, text="Phone Number")
-        treeUsers.heading("Reg Date", anchor=CENTER, text="Reg Date")
+        treeBooks.heading("#0", text="", anchor=W)
+        treeBooks.heading("Membership ID", anchor=CENTER, text="Membership ID")
+        treeBooks.heading("First Name", anchor=W, text="First Name")
+        treeBooks.heading("Last Name", anchor=W, text="Last Name")
+        treeBooks.heading("ID", anchor=CENTER, text="ID")
+        treeBooks.heading("Phone Number", anchor=CENTER, text="Phone Number")
+        treeBooks.heading("Reg Date", anchor=CENTER, text="Reg Date")
 
-        treeUsers.tag_configure("oddrow", background=entbg)
-        treeUsers.tag_configure("evenrow", background=btnbg)
+        treeBooks.tag_configure("oddrow", background=entbg)
+        treeBooks.tag_configure("evenrow", background=btnbg)
 
         iidCount = 0
         for record in dfUsers.values:
 
             if iidCount % 2 == 1:
-                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
                                  values=list(record), tags="oddrow")
             else:
-                treeUsers.insert(parent="", index='end', iid=iidCount, text="",
+                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
                                  values=list(record), tag="evenrow")
             iidCount += 1
 
-        treeUsers.place(rely=.5, relx=.5, anchor=CENTER)
+        treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
 
-        treeUsers.bind("<Double-1>", click)
+        treeBooks.bind("<Double-1>", click)
 
     def userEdit():
         global frmEdit, entMemID, entName, entLName
@@ -303,8 +313,8 @@ def usersMenu():
 
     def deleteUser():
         global delValues, dfUsers
-        selected = treeUsers.focus()
-        delValues = treeUsers.item(selected, "values")
+        selected = treeBooks.focus()
+        delValues = treeBooks.item(selected, "values")
 
         for index, record in enumerate(dfUsers.values):
             if list(record) == list(delValues):
@@ -404,9 +414,9 @@ def usersMenu():
 
     def click(e=""):
 
-        global treeUsers, entMemID, entName, entLName, id, values
-        selected = treeUsers.focus()
-        values = treeUsers.item(selected, "values")
+        global treeBooks, entMemID, entName, entLName, id, values
+        selected = treeBooks.focus()
+        values = treeBooks.item(selected, "values")
         entLName.delete(0,  END)
         entName.delete(0,  END)
         entMemID.delete(0,  END)
@@ -484,6 +494,167 @@ def usersMenu():
     btnSort.place(relx=.46, rely=.7, anchor=CENTER)
 
     # sort options end
+
+
+def booksMenu():
+    def booksMenu_ui():
+        def backToMenu():
+            BtnBackMenu.destroy()
+            cnvsBooks.destroy()
+            firstMenu()
+            global pageStatus
+            pageStatus = 2
+
+        def addBook():
+            addWindow = Toplevel(root, bg=cnvsbg, takefocus=True)
+            addWindow.title("Add Book")
+            addWindow.geometry("800x280")
+            addWindow.resizable(False, False)
+            addWindow.wm_iconphoto(False, photo)
+
+            def saveUser():
+                if tkinter.messagebox.askyesno(title="SAVE", message="do you wish to proceed?") == True:
+                    id = entAddID.get()
+                    lastName = entAddLastName.get()
+                    Name = entAddName.get()
+                    phone = entAddPhone.get()
+                    memidList = set()
+
+                    memID = str(random.randint(100000, 999999))
+                    for record in dfUsers.values:
+                        memidList.add(record[0])
+                        if record[3] == id:
+                            tkinter.messagebox.showerror(
+                                title="ERROR", message=f"this user with ID:{id}, already exists!")
+                            break
+                    else:
+                        while (True):
+                            memid = str(random.randint(100000, 999999))
+                            if memid not in memidList:
+                                newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
+                                                          "NUMBER": [phone], "DATE": [dt.datetime.now().strftime('%m/%d/%Y')]})
+                                dfUsers = pd.concat(
+                                    [dfUsers, newUserdf], ignore_index=True)
+                                sort(dbsort)
+                                print(dfUsers)
+                                break
+
+            lblfrmAddBook = LabelFrame(
+                addWindow, text="Add", width=700, height=200, font=("Helvetica Rounded", 10), bg=cnvsbg, bd=2)
+            lblfrmAddBook.place(relx=.5, rely=.4, anchor=CENTER)
+
+            entAddTitle = Entry(lblfrmAddBook,
+                                font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+            entAddTitle.place(relx=.3, rely=.2, anchor=CENTER)
+
+            lblAddTitle = Label(lblfrmAddBook, text="Title",
+                                font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblAddTitle.place(relx=.07, rely=.2, anchor=CENTER)
+
+            entAddAuthor = Entry(lblfrmAddBook,
+                                 font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+            entAddAuthor.place(relx=.3, rely=.45, anchor=CENTER)
+
+            lblAddAuthor = Label(lblfrmAddBook, text="Author",
+                                 font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblAddAuthor.place(relx=.07, rely=.45, anchor=CENTER)
+
+            entAddPublisher = Entry(lblfrmAddBook,
+                                    font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+            entAddPublisher.place(relx=.8, rely=.2, anchor=CENTER)
+
+            lblAddPublisher = Label(lblfrmAddBook, text="Publisher",
+                                    font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblAddPublisher.place(relx=.55, rely=.2, anchor=CENTER)
+
+            entAddPublishDate = Entry(lblfrmAddBook,
+                                      font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+            entAddPublishDate.place(relx=.8, rely=.45, anchor=CENTER)
+
+            lblAddPublishDate = Label(lblfrmAddBook, text="publish date",
+                                      font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblAddPublishDate.place(relx=.55, rely=.45, anchor=CENTER)
+
+            btnSave = Button(lblfrmAddBook, text="Save",
+                             bg=btnbg, font=("Helvetica Rounded", 12), command=saveUser)
+            btnSave.place(relx=.5, rely=.85, anchor=CENTER)
+
+            addWindow.grab_set()
+
+        BtnBackMenu = Button(root, text="BACK",
+                             bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
+        BtnBackMenu.place(relx=.05, rely=.05, anchor=CENTER)
+
+        cnvsBooks = Canvas(root, width=1200, height=500, bg=cnvsbg,
+                           highlightthickness=2, highlightbackground=cnvshl)
+        cnvsBooks.place(relx=.5, rely=.5, anchor=CENTER)
+
+        lblfrmBooks = LabelFrame(cnvsBooks, text="USERS", bd=2,
+                                 bg=cnvsbg, width=760, height=400, font=("Helvetica Rounded", 10))
+        lblfrmBooks.place(rely=.5, relx=.36, anchor=CENTER)
+
+        lblfrmOptions = LabelFrame(cnvsBooks, text="OPTIONS", width=300, height=400, font=("Helvetica Rounded", 10), bd=2,
+                                   bg=cnvsbg)
+        lblfrmOptions.place(rely=.5, relx=.82, anchor=CENTER)
+
+        btnAddBook = Button(lblfrmOptions, text="ADD",
+                            bg=btnbg, font=("Helvetica Rounded", 12), width=20, command=addBook)
+        btnAddBook.place(rely=.3, relx=.5, anchor=CENTER)
+
+        btnRemoveBook = Button(lblfrmOptions, text="REMOVE",
+                               bg=btnbg, font=("Helvetica Rounded", 12), width=20)
+        btnRemoveBook.place(rely=.65, relx=.5, anchor=CENTER)
+
+        def booksList():
+            global dfBooks
+            dfBooks = pd.read_excel(
+                'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
+            dfBooks = dfBooks.fillna("Missing")
+
+            scrlTree = Scrollbar(lblfrmBooks)
+            scrlTree.place(relx=.96, rely=.5, anchor=CENTER, relheight=.852)
+            global treeBooks
+            treeBooks = ttk.Treeview(lblfrmBooks, height=15,
+                                     yscrollcommand=scrlTree.set)
+            treeBooks["columns"] = ("Book ID", "Title", "Author",
+                                    "publisher", "publish Date")
+
+            scrlTree.config(command=treeBooks.yview)
+
+            treeBooks.column("#0", width=NO, minwidth=NO)
+            treeBooks.column("Book ID", anchor=CENTER,
+                             width=120, minwidth=100)
+            treeBooks.column("Title", anchor=W, width=160, minwidth=100)
+            treeBooks.column("Author", anchor=W, width=160, minwidth=100)
+            treeBooks.column("publisher", anchor=CENTER, width=80, minwidth=60)
+            treeBooks.column("publish Date", anchor=CENTER,
+                             width=160, minwidth=100)
+
+            treeBooks.heading("#0", text="", anchor=W)
+            treeBooks.heading("Book ID", anchor=CENTER, text="Book ID")
+            treeBooks.heading("Title", anchor=W, text="Title")
+            treeBooks.heading("Author", anchor=W, text="Author")
+            treeBooks.heading("publisher", anchor=CENTER, text="publisher")
+            treeBooks.heading("publish Date", anchor=CENTER,
+                              text="publish Date")
+
+            treeBooks.tag_configure("oddrow", background=entbg)
+            treeBooks.tag_configure("evenrow", background=btnbg)
+
+            iidCount = 0
+            for record in dfBooks.values:
+
+                if iidCount % 2 == 1:
+                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                     values=list(record), tags="oddrow")
+                else:
+                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                     values=list(record), tag="evenrow")
+                iidCount += 1
+
+            treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
+        booksList()
+    booksMenu_ui()
 
 
 pageDecider(pageStatus)
