@@ -7,7 +7,7 @@ import pandas as pd
 import random
 import datetime as dt
 # general attributes
-pageStatus = 4
+pageStatus = 5
 isHidden = True
 dbsort = "NONE"
 
@@ -56,6 +56,8 @@ def pageDecider(value):
         usersMenu()
     elif value == 4:
         booksMenu()
+    elif value == 5:
+        issueMenu()
 
 
 # login page and the first page of program
@@ -159,6 +161,13 @@ def firstMenu():
         canvas2.destroy()
         booksMenu()
 
+    def openIssue():
+        BtnLogout.destroy()
+        global pageStatus
+        pageStatus = 5
+        canvas2.destroy()
+        issueMenu()
+
     def logout():
         boolLogout = tkinter.messagebox.askyesno(
             title="Log Out", message="Do You want to logout")
@@ -182,7 +191,7 @@ def firstMenu():
     btnBooks.place(relx=.5, rely=.5, anchor=CENTER)
 
     btnIssue = Button(canvas2, bg=btnbg, text="ISSUE A BOOK",
-                      font=("Helvetica Rounded", 34), width=20)
+                      font=("Helvetica Rounded", 34), width=20, command=openIssue)
     btnIssue.place(relx=.5, rely=.8, anchor=CENTER)
 
 # users menu
@@ -707,6 +716,87 @@ def booksMenu():
             treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
         booksList()
     booksMenu_ui()
+
+
+def issueMenu():
+    def issueMenu_ui():
+        def backToMenu():
+            BtnBackMenu.destroy()
+            cnvsIssue.destroy()
+            firstMenu()
+            global pageStatus
+            pageStatus = 2
+        BtnBackMenu = Button(root, text="BACK",
+                             bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
+        BtnBackMenu.place(relx=.05, rely=.05, anchor=CENTER)
+
+        cnvsIssue = Canvas(root, width=1200, height=800, bg=cnvsbg,
+                           highlightthickness=2, highlightbackground=cnvshl)
+        cnvsIssue.place(relx=.5, rely=.5, anchor=CENTER)
+
+        lblfrmIssues = LabelFrame(cnvsIssue, text="USERS", bd=2,
+                                  bg=cnvsbg, width=1000, height=400, font=("Helvetica Rounded", 10))
+        lblfrmIssues.place(rely=.28, relx=.5, anchor=CENTER)
+
+        def issueList():
+            global dfIssues
+            dfIssues = pd.read_excel(
+                'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', na_values="Missing", dtype=str)
+            dfIssues = dfIssues.fillna("Missing")
+
+            scrlTree = Scrollbar(lblfrmIssues)
+            scrlTree.place(relx=.96, rely=.5, anchor=CENTER, relheight=.852)
+            global treeBooks
+            treeBooks = ttk.Treeview(lblfrmIssues, height=15,
+                                     yscrollcommand=scrlTree.set)
+            treeBooks["columns"] = ("Issue Number", "User", "User ID",
+                                    "Title", "book ID", "Issue Date", "EXP Date")
+
+            scrlTree.config(command=treeBooks.yview)
+
+            treeBooks.column("#0", width=NO, minwidth=NO)
+            treeBooks.column("Issue Number", anchor=CENTER,
+                             width=90, minwidth=80)
+            treeBooks.column("User", anchor=W, width=160, minwidth=100)
+            treeBooks.column("User ID", anchor=W, width=100, minwidth=80)
+            treeBooks.column("Title", anchor=CENTER, width=160, minwidth=100)
+            treeBooks.column("book ID", anchor=CENTER,
+                             width=90, minwidth=80)
+            treeBooks.column("Issue Date", anchor=CENTER,
+                             width=110, minwidth=100)
+            treeBooks.column("EXP Date", anchor=CENTER,
+                             width=110, minwidth=100)
+
+            treeBooks.heading("#0", text="", anchor=W)
+            treeBooks.heading("Issue Number", anchor=CENTER,
+                              text="Issue Number")
+            treeBooks.heading("User", anchor=W, text="User")
+            treeBooks.heading("User ID", anchor=W, text="User ID")
+            treeBooks.heading("Title", anchor=CENTER, text="Title")
+            treeBooks.heading("book ID", anchor=CENTER,
+                              text="book ID")
+            treeBooks.heading("Issue Date", anchor=CENTER,
+                              text="Issue Date")
+            treeBooks.heading("EXP Date", anchor=CENTER,
+                              text="EXP Date")
+
+            treeBooks.tag_configure("oddrow", background=entbg)
+            treeBooks.tag_configure("evenrow", background=btnbg)
+
+            iidCount = 0
+            for record in dfIssues.values:
+
+                if iidCount % 2 == 1:
+                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                     values=list(record), tags="oddrow")
+                else:
+                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                     values=list(record), tag="evenrow")
+                iidCount += 1
+
+            treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
+        issueList()
+    issueMenu_ui()
 
 
 pageDecider(pageStatus)
