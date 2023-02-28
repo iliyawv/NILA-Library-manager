@@ -351,7 +351,6 @@ def usersMenu():
                 phone = entAddPhone.get()
                 memidList = set()
 
-                memID = str(random.randint(100000, 999999))
                 for record in dfUsers.values:
                     memidList.add(record[0])
                     if record[3] == id:
@@ -360,13 +359,40 @@ def usersMenu():
                         break
                 else:
                     while (True):
-                        memid = str(random.randint(100000, 999999))
-                        if memid not in memidList:
+                        memID = str(random.randint(100000, 999999))
+                        if memID not in memidList:
+                            regDate = dt.datetime.now().strftime('%m/%d/%Y')
                             newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
-                                                      "NUMBER": [phone], "DATE": [dt.datetime.now().strftime('%m/%d/%Y')]})
+                                                      "NUMBER": [phone], "DATE": [regDate]})
                             dfUsers = pd.concat(
                                 [dfUsers, newUserdf], ignore_index=True)
                             sort(dbsort)
+
+                            from PIL import Image
+                            from PIL import ImageDraw
+
+                            from PIL import ImageFont
+
+                            imgFront = Image.open(
+                                'C:/Users/GECKO/git-projects/Library management/membership cards/template/1.png')
+
+                            I1 = ImageDraw.Draw(imgFront)
+                            myFont = ImageFont.truetype(
+                                'C:/Users/GECKO/AppData/Local/Microsoft/Windows/Fonts/Helvetica-Bold.ttf', 40)
+
+                            I1.text((677, 280), Name+" "+lastName, fill=(20, 20, 20),
+                                    font=myFont, align="center", anchor="mm")
+                            I1.text((755, 389), memID, fill=(20, 20, 20),
+                                    font=myFont, align="center", anchor="mm")
+                            I1.text((745, 583), regDate, fill=(20, 20, 20),
+                                    font=myFont, align="center", anchor="mm")
+                            I1.text((745, 486), id, fill=(20, 20, 20),
+                                    font=myFont, align="center", anchor="mm")
+                            print(memID)
+
+                            imgFront.show()
+                            imgFront.save(
+                                'C:/Users/GECKO/git-projects/Library management/membership cards/'+id+".png")
 
                             break
 
@@ -639,18 +665,20 @@ def booksMenu():
             treeBooks = ttk.Treeview(lblfrmBooks, height=15,
                                      yscrollcommand=scrlTree.set)
             treeBooks["columns"] = ("Book ID", "Title", "Author",
-                                    "Publisher", "Publish Date")
+                                    "Publisher", "Publish Date", "Status")
 
             scrlTree.config(command=treeBooks.yview)
 
             treeBooks.column("#0", width=NO, minwidth=NO)
             treeBooks.column("Book ID", anchor=CENTER,
-                             width=120, minwidth=100)
+                             width=80, minwidth=70)
             treeBooks.column("Title", anchor=W, width=160, minwidth=100)
             treeBooks.column("Author", anchor=W, width=160, minwidth=100)
             treeBooks.column("Publisher", anchor=CENTER, width=80, minwidth=60)
             treeBooks.column("Publish Date", anchor=CENTER,
                              width=160, minwidth=100)
+            treeBooks.column("Status", anchor=CENTER,
+                             width=80, minwidth=60)
 
             treeBooks.heading("#0", text="", anchor=W)
             treeBooks.heading("Book ID", anchor=CENTER, text="Book ID")
@@ -659,6 +687,8 @@ def booksMenu():
             treeBooks.heading("Publisher", anchor=CENTER, text="Publisher")
             treeBooks.heading("Publish Date", anchor=CENTER,
                               text="Publish Date")
+            treeBooks.heading("Status", anchor=CENTER,
+                              text="Status")
 
             treeBooks.tag_configure("oddrow", background=entbg)
             treeBooks.tag_configure("evenrow", background=btnbg)
