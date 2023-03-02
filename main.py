@@ -6,6 +6,9 @@ from tkinter import ttk
 import pandas as pd
 import random
 import datetime as dt
+from tkcalendar.calendar_ import Calendar
+
+
 # general attributes
 pageStatus = 5
 isHidden = True
@@ -17,6 +20,23 @@ entbg = "#e5e4e0"
 cnvsbg = "#b0997d"
 cnvshl = "#612601"
 btnbg = "#daccbf"
+
+entryFont = ("Helvetica Rounded", 18)
+
+# database
+dfIssues = pd.read_excel(
+    'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', na_values="Missing", dtype=str)
+dfIssues = dfIssues.fillna("Missing")
+
+dfUsers = pd.read_excel(
+    'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
+dfUsers = dfUsers.fillna("Missing")
+
+dfBooks = pd.read_excel(
+    'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
+dfBooks = dfBooks.fillna("Missing")
+
+print(dfUsers)
 
 
 root = Tk()
@@ -372,7 +392,7 @@ def usersMenu():
                         if memID not in memidList:
                             regDate = dt.datetime.now().strftime('%m/%d/%Y')
                             newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
-                                                      "NUMBER": [phone], "DATE": [regDate]})
+                                                      "NUMBER": [phone], "DATE": [regDate], "history": ["|"], "balance": ["0"]})
                             dfUsers = pd.concat(
                                 [dfUsers, newUserdf], ignore_index=True)
                             sort(dbsort)
@@ -564,7 +584,7 @@ def booksMenu():
                             break
 
                     newDf = pd.DataFrame({"Book ID": [bookID], "Title": [title], "Author": [author],
-                                         "Publisher": [publisher], "publish Date": [publishDate]})
+                                         "Publisher": [publisher], "publish Date": [publishDate], "Status": [True]})
                     dfBooks = pd.concat([dfBooks, newDf], ignore_index=True)
                     dfBooks.sort_values(
                         by="Publisher", inplace=True, ascending=True)
@@ -726,6 +746,103 @@ def issueMenu():
             firstMenu()
             global pageStatus
             pageStatus = 2
+
+        def addIssue():
+            addWindow = Toplevel(root, bg=cnvsbg, takefocus=True)
+            addWindow.title("ADD ISSUE")
+            addWindow.geometry("900x350")
+            addWindow.resizable(False, False)
+            addWindow.wm_iconphoto(False, photo)
+
+            lblframeAddIssue = LabelFrame(addWindow, text="ADD", bd=2,
+                                          bg=cnvsbg, width=850, height=320, font=("Helvetica Rounded", 10))
+            lblframeAddIssue.place(rely=.5, relx=.5, anchor=CENTER)
+
+            lblUserID = Label(lblframeAddIssue, text="User ID:",
+                              font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblUserID.place(rely=.3, relx=.07, anchor=CENTER)
+
+            entUserID = Entry(lblframeAddIssue,
+                              font=entryFont, bg=entbg, fg=entfg)
+            entUserID.place(rely=.3, relx=.3, anchor=CENTER)
+
+            lblBookID = Label(lblframeAddIssue, text="Book ID:",
+                              font=("Helvetica Rounded", 12), bg=cnvsbg)
+            lblBookID.place(rely=.6, relx=.07, anchor=CENTER)
+
+            entBookID = Entry(lblframeAddIssue,
+                              font=entryFont, bg=entbg, fg=entfg)
+            entBookID.place(rely=.6, relx=.3, anchor=CENTER)
+
+            def apply():
+                global lblfrmIssues
+                global dfUsers, dfBooks, dfIssues
+                if tkinter.messagebox.askokcancel(title="Save Issue", message="do you wish to proceed?"):
+                    userID = entUserID.get()
+                    bookID = entBookID.get()
+                    doBreak = False
+                    for i, record in enumerate(dfUsers.values):
+                        if record[0] == userID:
+                            for j, book in enumerate(dfBooks.values):
+                                if book[0] == bookID:
+                                    while True:
+                                        issueID = str(
+                                            random.randint(1000000, 9999999))
+                                        for id in dfIssues.values:
+                                            if record[0] == issueID:
+                                                break
+                                        else:
+                                            break
+
+                                    newdf = pd.DataFrame(
+                                        {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%y')], "EXP Date": [(cal.get_date())]})
+                                    dfIssues = pd.concat(
+                                        [dfIssues, newdf], ignore_index=True)
+                                    dfIssues.to_excel(
+                                        'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
+
+                                    dfUsers.at[i, "history"] = record[6] + \
+                                        "|" + book[1]
+
+                                    dfBooks.at[j, "Status"] = "False"
+
+                                    dfUsers.to_excel(
+                                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+                                    dfBooks.to_excel(
+                                        'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+
+                                    lblfrmIssues.destroy()
+                                    issueList()
+
+                                    print(newdf)
+                                    print(dfIssues)
+                                    doBreak = True
+                                    break
+
+                            else:
+                                tkinter.messagebox.showerror(
+                                    title="ERROR", message="Book not found!")
+                        if doBreak:
+                            break
+
+                    else:
+                        tkinter.messagebox.showerror(
+                            title="ERROR", message="User not found!")
+
+            btnApply = Button(lblframeAddIssue, text="Apply",
+                              bg=btnbg, font=("Helvetica Rounded", 12), command=apply)
+            btnApply.place(rely=.85, relx=.5, anchor=CENTER)
+
+            lblReturnDate = Label(lblframeAddIssue, text="pick a date to return", font=(
+                "Helvetica Rounded", 12), bg=cnvsbg)
+            lblReturnDate.place(rely=.1, relx=.8, anchor=CENTER)
+
+            cal = Calendar(lblframeAddIssue, selectmode="day",
+                           mindate=dt.date.today(), maxdate=dt.date.today()+dt.timedelta(days=180), background=cnvshl, bordercolor=cnvsbg, headersbackground=btnbg)
+            cal.place(rely=.5, relx=.8, anchor=CENTER)
+
+            addWindow.grab_set()
+
         BtnBackMenu = Button(root, text="BACK",
                              bg=btnbg, font=("Helvetica Rounded", 12), command=backToMenu)
         BtnBackMenu.place(relx=.05, rely=.05, anchor=CENTER)
@@ -734,67 +851,95 @@ def issueMenu():
                            highlightthickness=2, highlightbackground=cnvshl)
         cnvsIssue.place(relx=.5, rely=.5, anchor=CENTER)
 
-        lblfrmIssues = LabelFrame(cnvsIssue, text="USERS", bd=2,
-                                  bg=cnvsbg, width=1000, height=400, font=("Helvetica Rounded", 10))
-        lblfrmIssues.place(rely=.28, relx=.5, anchor=CENTER)
+        lblframeOptions = LabelFrame(cnvsIssue, text="OPTIONS", bd=2,
+                                     bg=cnvsbg, width=1000, height=140, font=("Helvetica Rounded", 10))
+        lblframeOptions.place(rely=.85, relx=.5, anchor=CENTER)
+
+        btnAddIssue = Button(lblframeOptions, text="issue a book",
+                             bg=btnbg, font=("Helvetica Rounded", 12), command=addIssue)
+        btnAddIssue.place(rely=.5, relx=.2, anchor=CENTER)
+
+        btnReturn = Button(lblframeOptions, text="Return",
+                           bg=btnbg, font=("Helvetica Rounded", 12))
+        btnReturn.place(rely=.5, relx=.5, anchor=CENTER)
+
+        def returnBook():
+            selected = treeIssues.focus()
+            delValues = treeIssues.item(selected, "values")
 
         def issueList():
+            global lblfrmIssues
+            lblfrmIssues = LabelFrame(cnvsIssue, text="ISSUES", bd=2,
+                                      bg=cnvsbg, width=1000, height=600, font=("Helvetica Rounded", 10))
+            lblfrmIssues.place(rely=.4, relx=.5, anchor=CENTER)
+
             global dfIssues
             dfIssues = pd.read_excel(
                 'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', na_values="Missing", dtype=str)
             dfIssues = dfIssues.fillna("Missing")
 
             scrlTree = Scrollbar(lblfrmIssues)
-            scrlTree.place(relx=.96, rely=.5, anchor=CENTER, relheight=.852)
-            global treeBooks
-            treeBooks = ttk.Treeview(lblfrmIssues, height=15,
-                                     yscrollcommand=scrlTree.set)
-            treeBooks["columns"] = ("Issue Number", "User", "User ID",
-                                    "Title", "book ID", "Issue Date", "EXP Date")
+            scrlTree.place(relx=.92, rely=.5, anchor=CENTER, relheight=.87)
+            global treeIssues
+            treeIssues = ttk.Treeview(lblfrmIssues, height=24,
+                                      yscrollcommand=scrlTree.set)
+            treeIssues["columns"] = ("Issue Number", "User", "User ID",
+                                     "Title", "book ID", "Issue Date", "EXP Date")
 
-            scrlTree.config(command=treeBooks.yview)
+            scrlTree.config(command=treeIssues.yview)
 
-            treeBooks.column("#0", width=NO, minwidth=NO)
-            treeBooks.column("Issue Number", anchor=CENTER,
-                             width=90, minwidth=80)
-            treeBooks.column("User", anchor=W, width=160, minwidth=100)
-            treeBooks.column("User ID", anchor=W, width=100, minwidth=80)
-            treeBooks.column("Title", anchor=CENTER, width=160, minwidth=100)
-            treeBooks.column("book ID", anchor=CENTER,
-                             width=90, minwidth=80)
-            treeBooks.column("Issue Date", anchor=CENTER,
-                             width=110, minwidth=100)
-            treeBooks.column("EXP Date", anchor=CENTER,
-                             width=110, minwidth=100)
+            treeIssues.column("#0", width=NO, minwidth=NO)
+            treeIssues.column("Issue Number", anchor=CENTER,
+                              width=90, minwidth=80)
+            treeIssues.column("User", anchor=W, width=160, minwidth=100)
+            treeIssues.column("User ID", anchor=W, width=100, minwidth=80)
+            treeIssues.column("Title", anchor=CENTER, width=160, minwidth=100)
+            treeIssues.column("book ID", anchor=CENTER,
+                              width=90, minwidth=80)
+            treeIssues.column("Issue Date", anchor=CENTER,
+                              width=110, minwidth=100)
+            treeIssues.column("EXP Date", anchor=CENTER,
+                              width=110, minwidth=100)
 
-            treeBooks.heading("#0", text="", anchor=W)
-            treeBooks.heading("Issue Number", anchor=CENTER,
-                              text="Issue Number")
-            treeBooks.heading("User", anchor=W, text="User")
-            treeBooks.heading("User ID", anchor=W, text="User ID")
-            treeBooks.heading("Title", anchor=CENTER, text="Title")
-            treeBooks.heading("book ID", anchor=CENTER,
-                              text="book ID")
-            treeBooks.heading("Issue Date", anchor=CENTER,
-                              text="Issue Date")
-            treeBooks.heading("EXP Date", anchor=CENTER,
-                              text="EXP Date")
+            treeIssues.heading("#0", text="", anchor=W)
+            treeIssues.heading("Issue Number", anchor=CENTER,
+                               text="Issue Number")
+            treeIssues.heading("User", anchor=W, text="User")
+            treeIssues.heading("User ID", anchor=W, text="User ID")
+            treeIssues.heading("Title", anchor=CENTER, text="Title")
+            treeIssues.heading("book ID", anchor=CENTER,
+                               text="book ID")
+            treeIssues.heading("Issue Date", anchor=CENTER,
+                               text="Issue Date")
+            treeIssues.heading("EXP Date", anchor=CENTER,
+                               text="EXP Date")
 
-            treeBooks.tag_configure("oddrow", background=entbg)
-            treeBooks.tag_configure("evenrow", background=btnbg)
+            treeIssues.tag_configure("oddrow", background=entbg)
+            treeIssues.tag_configure("evenrow", background=btnbg)
+            treeIssues.tag_configure("expired", foreground="red")
 
             iidCount = 0
+            cTime = dt.datetime.now().strftime('%m/%d/%Y')
             for record in dfIssues.values:
 
                 if iidCount % 2 == 1:
-                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
-                                     values=list(record), tags="oddrow")
+                    if record[-1] < cTime:
+                        treeIssues.insert(parent="", index='end', iid=iidCount, text="",
+                                          values=list(record), tags=("expired", "oddrow"))
+                    else:
+                        treeIssues.insert(parent="", index='end', iid=iidCount, text="",
+                                          values=list(record), tags="oddrow")
                 else:
-                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
-                                     values=list(record), tag="evenrow")
+                    if record[-1] < cTime:
+                        treeIssues.insert(parent="", index='end', iid=iidCount, text="",
+                                          values=list(record), tags=("expired", "evenrow"))
+                    else:
+                        treeIssues.insert(parent="", index='end', iid=iidCount, text="",
+                                          values=list(record), tags="evenrow")
+
                 iidCount += 1
 
-            treeBooks.place(rely=.5, relx=.5, anchor=CENTER)
+            treeIssues.place(rely=.5, relx=.5, anchor=CENTER)
         issueList()
     issueMenu_ui()
 
