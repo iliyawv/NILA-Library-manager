@@ -795,7 +795,7 @@ def issueMenu():
                                             break
 
                                     newdf = pd.DataFrame(
-                                        {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%y')], "EXP Date": [(cal.get_date())]})
+                                        {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%Y')], "EXP Date": [(cal.get_date())]})
                                     dfIssues = pd.concat(
                                         [dfIssues, newdf], ignore_index=True)
                                     dfIssues.to_excel(
@@ -838,7 +838,7 @@ def issueMenu():
             lblReturnDate.place(rely=.1, relx=.8, anchor=CENTER)
 
             cal = Calendar(lblframeAddIssue, selectmode="day",
-                           mindate=dt.date.today(), maxdate=dt.date.today()+dt.timedelta(days=180), background=cnvshl, bordercolor=cnvsbg, headersbackground=btnbg)
+                           mindate=dt.date.today(), maxdate=dt.date.today()+dt.timedelta(days=180), background=cnvshl, bordercolor=cnvsbg, headersbackground=btnbg, date_pattern="mm/dd/y")
             cal.place(rely=.5, relx=.8, anchor=CENTER)
 
             addWindow.grab_set()
@@ -859,13 +859,33 @@ def issueMenu():
                              bg=btnbg, font=("Helvetica Rounded", 12), command=addIssue)
         btnAddIssue.place(rely=.5, relx=.2, anchor=CENTER)
 
-        btnReturn = Button(lblframeOptions, text="Return",
-                           bg=btnbg, font=("Helvetica Rounded", 12))
-        btnReturn.place(rely=.5, relx=.5, anchor=CENTER)
-
         def returnBook():
+            global dfIssues, treeIssues
             selected = treeIssues.focus()
             delValues = treeIssues.item(selected, "values")
+
+            for i, record in enumerate(dfIssues.values):
+                if list(delValues) == list(record):
+                    dfIssues.drop(index=i, inplace=True)
+                    dfIssues.to_excel(
+                        'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
+                    lblfrmIssues.destroy()
+                    issueList()
+
+                    dayscount = (dt.datetime.strptime(
+                        record[6], "%m/%d/%Y") - dt.datetime.now()).days
+
+                    if dayscount < 0:
+                        for index, user in enumerate(dfUsers.values):
+                            if user[0] == record[2]:
+                                dfUsers.at[index, "balance"] = str(
+                                    int(user[7]) - dayscount * 5)
+                                dfUsers.to_excel(
+                                    excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+
+        btnReturn = Button(lblframeOptions, text="Return",
+                           bg=btnbg, font=("Helvetica Rounded", 12), command=returnBook)
+        btnReturn.place(rely=.5, relx=.5, anchor=CENTER)
 
         def issueList():
             global lblfrmIssues
