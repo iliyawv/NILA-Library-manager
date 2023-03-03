@@ -1,16 +1,18 @@
 from tkinter import *
 import tkinter.messagebox
 from PIL import Image, ImageTk
-import sqlite3
+import os
 from tkinter import ttk
 import pandas as pd
 import random
 import datetime as dt
 from tkcalendar.calendar_ import Calendar
 
+# install path
+instalPath = os.path.realpath(os.path.dirname(__file__))
 
 # general attributes
-pageStatus = 5
+pageStatus = 1
 isHidden = True
 dbsort = "NONE"
 
@@ -25,35 +27,36 @@ entryFont = ("Helvetica Rounded", 18)
 
 # database
 dfIssues = pd.read_excel(
-    'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', na_values="Missing", dtype=str)
+    instalPath+"/db/Issue.xlsx", na_values="Missing", dtype=str)
 dfIssues = dfIssues.fillna("Missing")
 
 dfUsers = pd.read_excel(
-    'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
+    instalPath+"/db/user.xlsx", na_values="Missing", dtype=str)
 dfUsers = dfUsers.fillna("Missing")
 
 dfBooks = pd.read_excel(
-    'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
+    instalPath+"/db/book.xlsx", na_values="Missing", dtype=str)
 dfBooks = dfBooks.fillna("Missing")
 
-print(dfUsers)
+# penalty price
+penalty = 500
 
 
 root = Tk()
 
 # media
 loginBG = PhotoImage(
-    file="C:/Users/GECKO/git-projects/Library management/media/libBG.png")
+    file=instalPath+"/media/libBG.png")
 
 ico = Image.open(
-    "C:/Users/GECKO/git-projects/Library management/media/icon.png")
+    file=instalPath+"/media/icon.png")
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
 
 viewIcon = PhotoImage(
-    file="C:/Users/GECKO/git-projects/Library management/media/view.png")
+    file=instalPath+"/media/view.png")
 hiddenIcon = PhotoImage(
-    file="C:/Users/GECKO/git-projects/Library management/media/hidden.png")
+    file=instalPath+"/media/hidden.png")
 
 # root attributes
 root.title("Library manager")
@@ -78,9 +81,9 @@ def pageDecider(value):
         booksMenu()
     elif value == 5:
         issueMenu()
-
-
 # login page and the first page of program
+
+
 def loginPage():
 
     def login(e=""):
@@ -88,7 +91,7 @@ def loginPage():
         password = entPass.get()
         try:
             credential = open(
-                f"C:/Users/GECKO/git-projects/Library management/{username}.txt", "r")
+                instalPath+"/{username}.txt", "r")
             if credential.read() != password:
                 tkinter.messagebox.showwarning(
                     title="ERROR", message="credential is unmatched")
@@ -284,6 +287,28 @@ def usersMenu():
 
         treeUsers.bind("<Double-1>", click)
 
+        def userInfo(e=""):
+            selected = treeUsers.focus()
+            user = treeUsers.item(selected, "values")
+
+            for record in dfUsers.values:
+                if record[0] == user[0]:
+                    userInfo = Toplevel(root, bg=cnvsbg, takefocus=True)
+                    userInfo.title("INFO")
+                    userInfo.geometry("200x200")
+                    userInfo.resizable(False, False)
+                    lblfrm = LabelFrame(userInfo, bd=2,
+                                        bg=cnvsbg, width=175, height=175, font=("Helvetica Rounded", 10))
+                    lblfrm.place(relx=.5, rely=.5, anchor=CENTER)
+                    lblbalance = Label(lblfrm, text="Balance: "+record[7],
+                                       font=("Helvetica Rounded", 12), bg=cnvsbg)
+                    lblbalance.place(relx=.5, rely=.3, anchor=CENTER)
+
+                    lblHistory = Label(lblfrm, text="History: "+record[6].replace("|", ","),
+                                       font=("Helvetica Rounded", 12), bg=cnvsbg)
+                    lblHistory.place(relx=.5, rely=.6, anchor=CENTER)
+        treeUsers.bind("<Button-3>	", userInfo)
+
     def userEdit():
         global frmEdit, entMemID, entName, entLName
         frmEdit = LabelFrame(canvas3, text="EDIT", bd=2,
@@ -350,9 +375,6 @@ def usersMenu():
                 if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
                     dfUsers.drop(index=index, inplace=True)
                     sort(dbsort)
-                    dfUsers = pd.read_excel(
-                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
-                    dfUsers = dfUsers.fillna("Missing")
                     tkinter.messagebox.showinfo(
                         title="Successful", message=f"user {record[1]} {record[2]} removed!")
                     break
@@ -500,9 +522,6 @@ def usersMenu():
     frmSortUsers.place(relx=.719, rely=.86, anchor=CENTER)
     # sort options
     global dfUsers
-    dfUsers = pd.read_excel(
-        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', na_values="Missing", dtype=str)
-    dfUsers = dfUsers.fillna("Missing")
 
     def sort(type):
         global dfUsers, id
@@ -645,9 +664,7 @@ def booksMenu():
                         dfBooks.drop(index=index, inplace=True)
                         dfBooks.to_excel(
                             'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
-                        dfBooks = pd.read_excel(
-                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
-                        dfBooks = dfBooks.fillna("Missing")
+
                         tkinter.messagebox.showinfo(
                             title="Successful", message=f"book {record[1]} removed!")
                         booksList()
@@ -684,9 +701,6 @@ def booksMenu():
 
         def booksList():
             global dfBooks
-            dfBooks = pd.read_excel(
-                'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', na_values="Missing", dtype=str)
-            dfBooks = dfBooks.fillna("Missing")
 
             scrlTree = Scrollbar(lblfrmBooks)
             scrlTree.place(relx=.96, rely=.5, anchor=CENTER, relheight=.852)
@@ -754,6 +768,9 @@ def issueMenu():
             addWindow.resizable(False, False)
             addWindow.wm_iconphoto(False, photo)
 
+            searchIcon = PhotoImage(
+                file="C:/Users/GECKO/git-projects/Library management/media/search.png")
+
             lblframeAddIssue = LabelFrame(addWindow, text="ADD", bd=2,
                                           bg=cnvsbg, width=850, height=320, font=("Helvetica Rounded", 10))
             lblframeAddIssue.place(rely=.5, relx=.5, anchor=CENTER)
@@ -774,6 +791,103 @@ def issueMenu():
                               font=entryFont, bg=entbg, fg=entfg)
             entBookID.place(rely=.6, relx=.3, anchor=CENTER)
 
+            def searchWindow():
+                searchwindow = Toplevel(addWindow, bg=cnvsbg, takefocus=True)
+                searchwindow.title("search Book")
+                searchwindow.geometry("800x400")
+                searchwindow.resizable(False, False)
+                searchwindow.wm_iconphoto(False, photo)
+                lblframettk = LabelFrame(searchwindow, text="books", bd=2,
+                                         bg=cnvsbg, width=750, height=375, font=("Helvetica Rounded", 10))
+                lblframettk.place(rely=.5, relx=.5, anchor=CENTER)
+
+                treeBooks = ttk.Treeview(lblframettk, height=12)
+                treeBooks["columns"] = ("Book ID", "Title", "Author",
+                                        "Publisher", "Publish Date", "Status")
+
+                treeBooks.column("#0", width=NO, minwidth=NO)
+                treeBooks.column("Book ID", anchor=CENTER,
+                                 width=80, minwidth=70)
+                treeBooks.column("Title", anchor=W, width=160, minwidth=100)
+                treeBooks.column("Author", anchor=W, width=160, minwidth=100)
+                treeBooks.column("Publisher", anchor=CENTER,
+                                 width=80, minwidth=60)
+                treeBooks.column("Publish Date", anchor=CENTER,
+                                 width=160, minwidth=100)
+                treeBooks.column("Status", anchor=CENTER,
+                                 width=80, minwidth=60)
+
+                treeBooks.heading("#0", text="", anchor=W)
+                treeBooks.heading("Book ID", anchor=CENTER, text="Book ID")
+                treeBooks.heading("Title", anchor=W, text="Title")
+                treeBooks.heading("Author", anchor=W, text="Author")
+                treeBooks.heading("Publisher", anchor=CENTER, text="Publisher")
+                treeBooks.heading("Publish Date", anchor=CENTER,
+                                  text="Publish Date")
+                treeBooks.heading("Status", anchor=CENTER,
+                                  text="Status")
+
+                treeBooks.tag_configure("oddrow", background=entbg)
+                treeBooks.tag_configure("evenrow", background=btnbg)
+
+                treeBooks.place(rely=.6, relx=.5, anchor=CENTER)
+
+                entsearch = Entry(lblframettk, font=entryFont,
+                                  bg=entbg, fg=entfg)
+
+                treeBooks.tag_configure("oddrow", background=entbg)
+                treeBooks.tag_configure("evenrow", background=btnbg)
+
+                entsearch.place(rely=.1, relx=.22, anchor=CENTER)
+
+                def doSearch():
+                    book = entsearch.get()
+                    if book == "":
+                        iidCount = 0
+                        treeBooks.delete(*treeBooks.get_children())
+                        for record in dfBooks.values:
+
+                            if iidCount % 2 == 1:
+                                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                                 values=list(record), tags="oddrow")
+                            else:
+                                treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                                 values=list(record), tag="evenrow")
+                            iidCount += 1
+                    else:
+                        iidCount = 0
+                        treeBooks.delete(*treeBooks.get_children())
+                        for bookname in dfBooks.values:
+                            if book in bookname[1]:
+                                if iidCount % 2 == 1:
+                                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                                     values=list(bookname), tags="oddrow")
+                                else:
+                                    treeBooks.insert(parent="", index='end', iid=iidCount, text="",
+                                                     values=list(bookname), tag="evenrow")
+                                iidCount += 1
+                doSearch()
+
+                def bookNameByID(e=""):
+                    selected = treeBooks.focus()
+                    item = treeBooks.item(selected, "values")[0]
+                    searchwindow.destroy()
+                    print(item)
+                    entBookID.insert(0, item)
+
+                treeBooks.bind("<Double-1>", bookNameByID)
+                btnDoSearch = Button(
+                    lblframettk, text="Search", bg=btnbg, font=("Helvetica Rounded", 12), command=doSearch)
+                btnDoSearch.place(rely=.1, relx=.49, anchor=CENTER)
+
+                searchwindow.grab_set()
+
+            btnSearch = Button(entBookID, height=25,
+                               width=25, image=searchIcon, command=searchWindow)
+            btnSearch.image = searchIcon
+
+            btnSearch.place(rely=.5, relx=.95, anchor=CENTER)
+
             def apply():
                 global lblfrmIssues
                 global dfUsers, dfBooks, dfIssues
@@ -785,39 +899,45 @@ def issueMenu():
                         if record[0] == userID:
                             for j, book in enumerate(dfBooks.values):
                                 if book[0] == bookID:
-                                    while True:
-                                        issueID = str(
-                                            random.randint(1000000, 9999999))
-                                        for id in dfIssues.values:
-                                            if record[0] == issueID:
+                                    if book[5] == "True":
+                                        while True:
+                                            issueID = str(
+                                                random.randint(1000000, 9999999))
+                                            for id in dfIssues.values:
+                                                if record[0] == issueID:
+                                                    break
+                                            else:
                                                 break
-                                        else:
-                                            break
 
-                                    newdf = pd.DataFrame(
-                                        {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%Y')], "EXP Date": [(cal.get_date())]})
-                                    dfIssues = pd.concat(
-                                        [dfIssues, newdf], ignore_index=True)
-                                    dfIssues.to_excel(
-                                        'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
+                                        newdf = pd.DataFrame(
+                                            {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%Y')], "EXP Date": [(cal.get_date())]})
+                                        dfIssues = pd.concat(
+                                            [dfIssues, newdf], ignore_index=True)
+                                        dfIssues.to_excel(
+                                            'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
 
-                                    dfUsers.at[i, "history"] = record[6] + \
-                                        "|" + book[1]
+                                        dfUsers.at[i, "history"] = record[6] + \
+                                            "|" + book[1]
 
-                                    dfBooks.at[j, "Status"] = "False"
+                                        dfBooks.at[j, "Status"] = "False"
 
-                                    dfUsers.to_excel(
-                                        'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
-                                    dfBooks.to_excel(
-                                        'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                                        dfUsers.to_excel(
+                                            'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+                                        dfBooks.to_excel(
+                                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
 
-                                    lblfrmIssues.destroy()
-                                    issueList()
+                                        lblfrmIssues.destroy()
+                                        issueList()
 
-                                    print(newdf)
-                                    print(dfIssues)
-                                    doBreak = True
-                                    break
+                                        print(newdf)
+                                        print(dfIssues)
+                                        doBreak = True
+                                        break
+                                    else:
+                                        tkinter.messagebox.showerror(
+                                            title="ERROR", message="Someone else has the book!")
+                                        doBreak = True
+                                        break
 
                             else:
                                 tkinter.messagebox.showerror(
@@ -852,7 +972,7 @@ def issueMenu():
         cnvsIssue.place(relx=.5, rely=.5, anchor=CENTER)
 
         lblframeOptions = LabelFrame(cnvsIssue, text="OPTIONS", bd=2,
-                                     bg=cnvsbg, width=1000, height=140, font=("Helvetica Rounded", 10))
+                                     bg=cnvsbg, width=1000, height=100, font=("Helvetica Rounded", 10))
         lblframeOptions.place(rely=.85, relx=.5, anchor=CENTER)
 
         btnAddIssue = Button(lblframeOptions, text="issue a book",
@@ -860,7 +980,7 @@ def issueMenu():
         btnAddIssue.place(rely=.5, relx=.2, anchor=CENTER)
 
         def returnBook():
-            global dfIssues, treeIssues
+            global dfIssues, treeIssues, penalty, dfBooks
             selected = treeIssues.focus()
             delValues = treeIssues.item(selected, "values")
 
@@ -871,32 +991,36 @@ def issueMenu():
                         'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
                     lblfrmIssues.destroy()
                     issueList()
-
+                    print(delValues)
                     dayscount = (dt.datetime.strptime(
                         record[6], "%m/%d/%Y") - dt.datetime.now()).days
+
+                    for j, book in enumerate(dfBooks.values):
+                        if delValues[4] == book[0]:
+                            dfBooks.at[j, "Status"] = "True"
+                            dfBooks.to_excel(
+                                excel_writer='C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                            print("sssss")
+                            break
 
                     if dayscount < 0:
                         for index, user in enumerate(dfUsers.values):
                             if user[0] == record[2]:
                                 dfUsers.at[index, "balance"] = str(
-                                    int(user[7]) - dayscount * 5)
+                                    int(user[7]) - (dayscount * penalty))
                                 dfUsers.to_excel(
                                     excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+                                break
 
         btnReturn = Button(lblframeOptions, text="Return",
                            bg=btnbg, font=("Helvetica Rounded", 12), command=returnBook)
         btnReturn.place(rely=.5, relx=.5, anchor=CENTER)
 
         def issueList():
-            global lblfrmIssues
+            global lblfrmIssues, dfIssues
             lblfrmIssues = LabelFrame(cnvsIssue, text="ISSUES", bd=2,
                                       bg=cnvsbg, width=1000, height=600, font=("Helvetica Rounded", 10))
             lblfrmIssues.place(rely=.4, relx=.5, anchor=CENTER)
-
-            global dfIssues
-            dfIssues = pd.read_excel(
-                'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', na_values="Missing", dtype=str)
-            dfIssues = dfIssues.fillna("Missing")
 
             scrlTree = Scrollbar(lblfrmIssues)
             scrlTree.place(relx=.92, rely=.5, anchor=CENTER, relheight=.87)
