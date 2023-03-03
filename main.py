@@ -12,7 +12,7 @@ from tkcalendar.calendar_ import Calendar
 instalPath = os.path.realpath(os.path.dirname(__file__))
 
 # general attributes
-pageStatus = 1
+pageStatus = 2
 isHidden = True
 dbsort = "NONE"
 
@@ -59,7 +59,7 @@ hiddenIcon = PhotoImage(
     file=instalPath+"/media/hidden.png")
 
 # root attributes
-root.title("Library manager")
+root.title("NILA Library")
 root.geometry("1200x800")
 root.state('zoomed')
 lblphoto = Label(root, image=loginBG,
@@ -295,18 +295,55 @@ def usersMenu():
                 if record[0] == user[0]:
                     userInfo = Toplevel(root, bg=cnvsbg, takefocus=True)
                     userInfo.title("INFO")
-                    userInfo.geometry("200x200")
+                    userInfo.geometry("600x400")
                     userInfo.resizable(False, False)
-                    lblfrm = LabelFrame(userInfo, bd=2,
-                                        bg=cnvsbg, width=175, height=175, font=("Helvetica Rounded", 10))
+                    lblfrm = LabelFrame(userInfo, bd=2, text="History",
+                                        bg=cnvsbg, width=575, height=375, font=("Helvetica Rounded", 10))
                     lblfrm.place(relx=.5, rely=.5, anchor=CENTER)
                     lblbalance = Label(lblfrm, text="Balance: "+record[7],
                                        font=("Helvetica Rounded", 12), bg=cnvsbg)
-                    lblbalance.place(relx=.5, rely=.3, anchor=CENTER)
+                    lblbalance.place(relx=.15, rely=.9, anchor=CENTER)
 
-                    lblHistory = Label(lblfrm, text="History: "+record[6].replace("|", ","),
-                                       font=("Helvetica Rounded", 12), bg=cnvsbg)
-                    lblHistory.place(relx=.5, rely=.6, anchor=CENTER)
+                    treeHitory = ttk.Treeview(lblfrm, height=10)
+                    treeHitory["columns"] = (
+                        "Books Issued", "issued Date", "Return Date")
+
+                    treeHitory.column("#0", width=NO, minwidth=NO)
+                    treeHitory.column("Books Issued", anchor=CENTER,
+                                      width=120, minwidth=100)
+                    treeHitory.column("issued Date", anchor=W,
+                                      width=160, minwidth=100)
+                    treeHitory.column("Return Date", anchor=W,
+                                      width=160, minwidth=100)
+
+                    treeHitory.heading("#0", text="", anchor=W)
+                    treeHitory.heading(
+                        "Books Issued", anchor=CENTER, text="Books Issued")
+                    treeHitory.heading(
+                        "issued Date", anchor=W, text="issued Date")
+                    treeHitory.heading(
+                        "Return Date", anchor=W, text="Return Date")
+
+                    treeHitory.tag_configure("oddrow", background=entbg)
+                    treeHitory.tag_configure("evenrow", background=btnbg)
+                    infoList = list(
+                        zip(record[6].split("|"), record[8].split("|"), record[9].split("|")))
+                    iidCount = 0
+                    for record in infoList:
+
+                        if iidCount % 2 == 1:
+                            treeHitory.insert(parent="", index='end', iid=iidCount, text="",
+                                              values=list(record), tags="oddrow")
+                        else:
+                            treeHitory.insert(parent="", index='end', iid=iidCount, text="",
+                                              values=list(record), tag="evenrow")
+                        iidCount += 1
+
+                    treeHitory.place(rely=.5, relx=.5, anchor=CENTER)
+
+                    userInfo.grab_set()
+                    break
+
         treeUsers.bind("<Button-3>	", userInfo)
 
     def userEdit():
@@ -414,7 +451,7 @@ def usersMenu():
                         if memID not in memidList:
                             regDate = dt.datetime.now().strftime('%m/%d/%Y')
                             newUserdf = pd.DataFrame({"Mem ID": [memID], "NAME": [Name], "LAST NAME": [lastName], "ID": [id],
-                                                      "NUMBER": [phone], "DATE": [regDate], "history": ["|"], "balance": ["0"]})
+                                                      "NUMBER": [phone], "DATE": [regDate], "Book ID": ["|"], "balance": ["0"], "Iss Date": ["|"], "Ret Date": ["|"]})
                             dfUsers = pd.concat(
                                 [dfUsers, newUserdf], ignore_index=True)
                             sort(dbsort)
@@ -435,13 +472,13 @@ def usersMenu():
                             myFont = ImageFont.truetype(
                                 instalPath+"/media/Helvetica-Bold.ttf", 40)
 
-                            I1.text((677, 280), Name+" "+lastName, fill=(20, 20, 20),
+                            I1.text((680, 263), Name+" "+lastName, fill=(176, 153, 125),
                                     font=myFont, align="center", anchor="mm")
-                            I2.text((755, 389), memID, fill=(20, 20, 20),
+                            I2.text((758, 380), memID, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
-                            I3.text((745, 583), regDate, fill=(20, 20, 20),
+                            I3.text((758, 473), regDate, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
-                            I4.text((745, 486), id, fill=(20, 20, 20),
+                            I4.text((758, 565), id, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
 
                             imgFront.show()
@@ -783,7 +820,7 @@ def issueMenu():
             lblUserID.place(rely=.3, relx=.07, anchor=CENTER)
 
             entUserID = Entry(lblframeAddIssue,
-                              font=entryFont, bg=entbg, fg=entfg)
+                              font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
             entUserID.place(rely=.3, relx=.3, anchor=CENTER)
 
             lblBookID = Label(lblframeAddIssue, text="Book ID:",
@@ -791,7 +828,7 @@ def issueMenu():
             lblBookID.place(rely=.6, relx=.07, anchor=CENTER)
 
             entBookID = Entry(lblframeAddIssue,
-                              font=entryFont, bg=entbg, fg=entfg)
+                              font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
             entBookID.place(rely=.6, relx=.3, anchor=CENTER)
 
             def searchWindow():
@@ -835,7 +872,7 @@ def issueMenu():
 
                 treeBooks.place(rely=.6, relx=.5, anchor=CENTER)
 
-                entsearch = Entry(lblframettk, font=entryFont,
+                entsearch = Entry(lblframettk, font=("Helvetica Rounded", 12),
                                   bg=entbg, fg=entfg)
 
                 treeBooks.tag_configure("oddrow", background=entbg)
@@ -912,15 +949,21 @@ def issueMenu():
                                             else:
                                                 break
 
+                                        IssDate = dt.datetime.now().strftime('%m/%d/%Y')
+                                        RetDate = cal.get_date()
                                         newdf = pd.DataFrame(
-                                            {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [dt.datetime.now().strftime('%m/%d/%Y')], "EXP Date": [(cal.get_date())]})
+                                            {"Issue Number": [issueID], "User": [record[1]+" "+record[2]], "User ID": [userID], "Title": [book[1]], "book ID": [bookID], "Issue Date": [IssDate], "EXP Date": [RetDate]})
                                         dfIssues = pd.concat(
                                             [dfIssues, newdf], ignore_index=True)
                                         dfIssues.to_excel(
                                             instalPath+"/db/Issue.xlsx", index=False, header=True)
 
-                                        dfUsers.at[i, "history"] = record[6] + \
-                                            "|" + book[1]
+                                        dfUsers.at[i, "Book ID"] = record[6] + \
+                                            "|" + book[0]
+                                        dfUsers.at[i, "Iss Date"] = record[8] + \
+                                            "|" + IssDate
+                                        dfUsers.at[i, "Ret Date"] = record[9] + \
+                                            "|" + RetDate
 
                                         dfBooks.at[j, "Status"] = "False"
 
@@ -994,7 +1037,7 @@ def issueMenu():
                     issueList()
 
                     dayscount = (dt.datetime.strptime(
-                        record[6], "%m/%d/%Y") - dt.datetime.now()).days
+                        record[6], "%m/%d/%Y") - dt.datetime.now()).days + 1
 
                     for j, book in enumerate(dfBooks.values):
                         if delValues[4] == book[0]:
@@ -1008,7 +1051,7 @@ def issueMenu():
                         for index, user in enumerate(dfUsers.values):
                             if user[0] == record[2]:
                                 dfUsers.at[index, "balance"] = str(
-                                    int(user[7]) - (dayscount * penalty))
+                                    int(user[7]) + (dayscount * penalty))
                                 dfUsers.to_excel(
                                     excel_writer=instalPath+"/db/user.xlsx", index=False, header=True)
                                 break
