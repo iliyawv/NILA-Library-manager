@@ -7,10 +7,15 @@ import pandas as pd
 import random
 import datetime as dt
 from tkcalendar.calendar_ import Calendar
+import pyglet
 
 # install path
+# os.path.realpath(os.path.dirname(__file__))
+# os.getcwd()
 instalPath = os.path.realpath(os.path.dirname(__file__))
 
+
+pyglet.font.add_file(instalPath+"/media/Helvetica-Bold.ttf")
 # general attributes
 pageStatus = 2
 isHidden = True
@@ -476,15 +481,17 @@ def usersMenu():
                                     font=myFont, align="center", anchor="mm")
                             I2.text((758, 380), memID, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
-                            I3.text((758, 473), regDate, fill=(0, 0, 0),
+                            I3.text((758, 473), id, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
-                            I4.text((758, 565), id, fill=(0, 0, 0),
+                            I4.text((758, 565), regDate, fill=(0, 0, 0),
                                     font=myFont, align="center", anchor="mm")
 
                             imgFront.show()
                             imgFront.save(
                                 instalPath+"/membership cards/"+id+".png")
-
+                            addWindow.destroy()
+                            tkinter.messagebox.showinfo(
+                                title="SUCCESSFULL!", message="You added a new user successfuly")
                             break
 
         lblfrmAddUser = LabelFrame(
@@ -578,7 +585,7 @@ def usersMenu():
         id = 0
 
         dfUsers.to_excel(
-            excel_writer=instalPath+"/db/user.xlsx", index=False, header=True)
+            instalPath+"/db/user.xlsx", index=False, header=True)
 
         frmUsers.destroy()
         userList()
@@ -627,7 +634,7 @@ def booksMenu():
             addWindow.wm_iconphoto(False, photo)
 
             def saveBook():
-                global dfBooks
+                global dfBooks, lblfrmBooks
                 if tkinter.messagebox.askyesno(title="SAVE", message="do you wish to proceed?") == True:
                     title = entAddTitle.get()
                     author = entAddAuthor.get()
@@ -643,13 +650,19 @@ def booksMenu():
                             break
 
                     newDf = pd.DataFrame({"Book ID": [bookID], "Title": [title], "Author": [author],
-                                         "Publisher": [publisher], "publish Date": [publishDate], "Status": [True]})
-                    dfBooks = pd.concat([dfBooks, newDf], ignore_index=True)
-                    dfBooks.sort_values(
-                        by="Publisher", inplace=True, ascending=True)
+                                         "Publisher": [publisher], "publish Date": [publishDate], "Status": ["True"]})
+                    dfBooks = pd.concat([dfBooks, newDf], ignore_index=True,)
+                    dfBooks = dfBooks.sort_values(
+                        by="Publisher",  ascending=True)
+
+                    dfBooks.reset_index(drop=True, inplace=True)
                     dfBooks.to_excel(
                         instalPath+"/db/book.xlsx", index=False, header=True)
+                    lblfrmBooks.destroy()
                     booksList()
+                    addWindow.destroy()
+                    tkinter.messagebox.showinfo(
+                        title="SUCCESSFULL!", message="You added a new Book successfuly")
 
             lblfrmAddBook = LabelFrame(
                 addWindow, text="Add", width=700, height=200, font=("Helvetica Rounded", 10), bg=cnvsbg, bd=2)
@@ -699,7 +712,7 @@ def booksMenu():
             delValues = treeBooks.item(selected, "values")
 
             for index, record in enumerate(dfBooks.values):
-                if list(record) == list(delValues):
+                if list(record)[0] == list(delValues)[0]:
                     if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
                         dfBooks.drop(index=index, inplace=True)
                         dfBooks.to_excel(
@@ -723,10 +736,6 @@ def booksMenu():
                            highlightthickness=2, highlightbackground=cnvshl)
         cnvsBooks.place(relx=.5, rely=.5, anchor=CENTER)
 
-        lblfrmBooks = LabelFrame(cnvsBooks, text="USERS", bd=2,
-                                 bg=cnvsbg, width=760, height=400, font=("Helvetica Rounded", 10))
-        lblfrmBooks.place(rely=.5, relx=.36, anchor=CENTER)
-
         lblfrmOptions = LabelFrame(cnvsBooks, text="OPTIONS", width=300, height=400, font=("Helvetica Rounded", 10), bd=2,
                                    bg=cnvsbg)
         lblfrmOptions.place(rely=.5, relx=.82, anchor=CENTER)
@@ -740,7 +749,10 @@ def booksMenu():
         btnRemoveBook.place(rely=.65, relx=.5, anchor=CENTER)
 
         def booksList():
-            global dfBooks
+            global dfBooks, lblfrmBooks
+            lblfrmBooks = LabelFrame(cnvsBooks, text="BOOKS", bd=2,
+                                     bg=cnvsbg, width=760, height=400, font=("Helvetica Rounded", 10))
+            lblfrmBooks.place(rely=.5, relx=.36, anchor=CENTER)
 
             scrlTree = Scrollbar(lblfrmBooks)
             scrlTree.place(relx=.96, rely=.5, anchor=CENTER, relheight=.852)
@@ -820,7 +832,7 @@ def issueMenu():
             lblUserID.place(rely=.3, relx=.07, anchor=CENTER)
 
             entUserID = Entry(lblframeAddIssue,
-                              font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+                              font=("Helvetica Rounded", 14), bg=entbg, fg=entfg)
             entUserID.place(rely=.3, relx=.3, anchor=CENTER)
 
             lblBookID = Label(lblframeAddIssue, text="Book ID:",
@@ -828,7 +840,7 @@ def issueMenu():
             lblBookID.place(rely=.6, relx=.07, anchor=CENTER)
 
             entBookID = Entry(lblframeAddIssue,
-                              font=("Helvetica Rounded", 12), bg=entbg, fg=entfg)
+                              font=("Helvetica Rounded", 14), bg=entbg, fg=entfg)
             entBookID.place(rely=.6, relx=.3, anchor=CENTER)
 
             def searchWindow():
@@ -922,11 +934,11 @@ def issueMenu():
 
                 searchwindow.grab_set()
 
-            btnSearch = Button(entBookID, height=25,
-                               width=25, image=searchIcon, command=searchWindow)
+            btnSearch = Button(lblframeAddIssue, height=20,
+                               width=20, image=searchIcon, command=searchWindow)
             btnSearch.image = searchIcon
 
-            btnSearch.place(rely=.5, relx=.95, anchor=CENTER)
+            btnSearch.place(rely=.6, relx=.43, anchor=CENTER)
 
             def apply():
                 global lblfrmIssues
@@ -974,6 +986,9 @@ def issueMenu():
 
                                         lblfrmIssues.destroy()
                                         issueList()
+                                        tkinter.messagebox.showinfo(
+                                            title="SUCCESSFULL!", message="You added a new Issue successfuly")
+                                        addWindow.destroy()
 
                                         doBreak = True
                                         break
@@ -1043,9 +1058,11 @@ def issueMenu():
                         if delValues[4] == book[0]:
                             dfBooks.at[j, "Status"] = "True"
                             dfBooks.to_excel(
-                                excel_writer=instalPath+"/db/book.xlsx", index=False, header=True)
+                                instalPath+"/db/book.xlsx", index=False, header=True)
 
                             break
+                    tkinter.messagebox.showinfo(
+                        title="SUCCESSFULL!", message="You deleted the Issue successfuly")
 
                     if dayscount < 0:
                         for index, user in enumerate(dfUsers.values):
@@ -1053,7 +1070,7 @@ def issueMenu():
                                 dfUsers.at[index, "balance"] = str(
                                     int(user[7]) + (dayscount * penalty))
                                 dfUsers.to_excel(
-                                    excel_writer=instalPath+"/db/user.xlsx", index=False, header=True)
+                                    instalPath+"/db/user.xlsx", index=False, header=True)
                                 break
 
         btnReturn = Button(lblframeOptions, text="Return",
