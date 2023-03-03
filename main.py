@@ -49,7 +49,7 @@ loginBG = PhotoImage(
     file=instalPath+"/media/libBG.png")
 
 ico = Image.open(
-    file=instalPath+"/media/icon.png")
+    instalPath+"/media/icon.png")
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
 
@@ -71,10 +71,10 @@ lblphoto.pack()
 def pageDecider(value):
     if value == 1:
         loginPage()
-        print(value)
+
     elif value == 2:
         firstMenu()
-        print(value)
+
     elif value == 3:
         usersMenu()
     elif value == 4:
@@ -91,7 +91,7 @@ def loginPage():
         password = entPass.get()
         try:
             credential = open(
-                instalPath+"/{username}.txt", "r")
+                instalPath+f"/{username}.txt", "r")
             if credential.read() != password:
                 tkinter.messagebox.showwarning(
                     title="ERROR", message="credential is unmatched")
@@ -425,25 +425,28 @@ def usersMenu():
                             from PIL import ImageFont
 
                             imgFront = Image.open(
-                                'C:/Users/GECKO/git-projects/Library management/membership cards/template/1.png')
+                                instalPath+"/membership cards/template/1.png")
 
+                            # ERROR(inheriting not possible)
                             I1 = ImageDraw.Draw(imgFront)
+                            I2 = ImageDraw.Draw(imgFront)
+                            I3 = ImageDraw.Draw(imgFront)
+                            I4 = ImageDraw.Draw(imgFront)
                             myFont = ImageFont.truetype(
-                                'C:/Users/GECKO/AppData/Local/Microsoft/Windows/Fonts/Helvetica-Bold.ttf', 40)
+                                instalPath+"/media/Helvetica-Bold.ttf", 40)
 
                             I1.text((677, 280), Name+" "+lastName, fill=(20, 20, 20),
                                     font=myFont, align="center", anchor="mm")
-                            I1.text((755, 389), memID, fill=(20, 20, 20),
+                            I2.text((755, 389), memID, fill=(20, 20, 20),
                                     font=myFont, align="center", anchor="mm")
-                            I1.text((745, 583), regDate, fill=(20, 20, 20),
+                            I3.text((745, 583), regDate, fill=(20, 20, 20),
                                     font=myFont, align="center", anchor="mm")
-                            I1.text((745, 486), id, fill=(20, 20, 20),
+                            I4.text((745, 486), id, fill=(20, 20, 20),
                                     font=myFont, align="center", anchor="mm")
-                            print(memID)
 
                             imgFront.show()
                             imgFront.save(
-                                'C:/Users/GECKO/git-projects/Library management/membership cards/'+id+".png")
+                                instalPath+"/membership cards/"+id+".png")
 
                             break
 
@@ -538,7 +541,7 @@ def usersMenu():
         id = 0
 
         dfUsers.to_excel(
-            excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+            excel_writer=instalPath+"/db/user.xlsx", index=False, header=True)
 
         frmUsers.destroy()
         userList()
@@ -608,7 +611,7 @@ def booksMenu():
                     dfBooks.sort_values(
                         by="Publisher", inplace=True, ascending=True)
                     dfBooks.to_excel(
-                        'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                        instalPath+"/db/book.xlsx", index=False, header=True)
                     booksList()
 
             lblfrmAddBook = LabelFrame(
@@ -663,7 +666,7 @@ def booksMenu():
                     if tkinter.messagebox.askyesno("DELETE", "do you want to proceed?") == True:
                         dfBooks.drop(index=index, inplace=True)
                         dfBooks.to_excel(
-                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                            instalPath+"/db/book.xlsx", index=False, header=True)
 
                         tkinter.messagebox.showinfo(
                             title="Successful", message=f"book {record[1]} removed!")
@@ -769,7 +772,7 @@ def issueMenu():
             addWindow.wm_iconphoto(False, photo)
 
             searchIcon = PhotoImage(
-                file="C:/Users/GECKO/git-projects/Library management/media/search.png")
+                file=instalPath+"/media/search.png")
 
             lblframeAddIssue = LabelFrame(addWindow, text="ADD", bd=2,
                                           bg=cnvsbg, width=850, height=320, font=("Helvetica Rounded", 10))
@@ -872,7 +875,7 @@ def issueMenu():
                     selected = treeBooks.focus()
                     item = treeBooks.item(selected, "values")[0]
                     searchwindow.destroy()
-                    print(item)
+
                     entBookID.insert(0, item)
 
                 treeBooks.bind("<Double-1>", bookNameByID)
@@ -914,7 +917,7 @@ def issueMenu():
                                         dfIssues = pd.concat(
                                             [dfIssues, newdf], ignore_index=True)
                                         dfIssues.to_excel(
-                                            'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
+                                            instalPath+"/db/Issue.xlsx", index=False, header=True)
 
                                         dfUsers.at[i, "history"] = record[6] + \
                                             "|" + book[1]
@@ -922,15 +925,13 @@ def issueMenu():
                                         dfBooks.at[j, "Status"] = "False"
 
                                         dfUsers.to_excel(
-                                            'C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+                                            instalPath+"/db/user.xlsx", index=False, header=True)
                                         dfBooks.to_excel(
-                                            'C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
+                                            instalPath+"/db/book.xlsx", index=False, header=True)
 
                                         lblfrmIssues.destroy()
                                         issueList()
 
-                                        print(newdf)
-                                        print(dfIssues)
                                         doBreak = True
                                         break
                                     else:
@@ -988,10 +989,10 @@ def issueMenu():
                 if list(delValues) == list(record):
                     dfIssues.drop(index=i, inplace=True)
                     dfIssues.to_excel(
-                        'C:/Users/GECKO/git-projects/Library management/db/Issue.xlsx', index=False, header=True)
+                        instalPath+"/db/Issue.xlsx", index=False, header=True)
                     lblfrmIssues.destroy()
                     issueList()
-                    print(delValues)
+
                     dayscount = (dt.datetime.strptime(
                         record[6], "%m/%d/%Y") - dt.datetime.now()).days
 
@@ -999,8 +1000,8 @@ def issueMenu():
                         if delValues[4] == book[0]:
                             dfBooks.at[j, "Status"] = "True"
                             dfBooks.to_excel(
-                                excel_writer='C:/Users/GECKO/git-projects/Library management/db/book.xlsx', index=False, header=True)
-                            print("sssss")
+                                excel_writer=instalPath+"/db/book.xlsx", index=False, header=True)
+
                             break
 
                     if dayscount < 0:
@@ -1009,7 +1010,7 @@ def issueMenu():
                                 dfUsers.at[index, "balance"] = str(
                                     int(user[7]) - (dayscount * penalty))
                                 dfUsers.to_excel(
-                                    excel_writer='C:/Users/GECKO/git-projects/Library management/db/user.xlsx', index=False, header=True)
+                                    excel_writer=instalPath+"/db/user.xlsx", index=False, header=True)
                                 break
 
         btnReturn = Button(lblframeOptions, text="Return",
