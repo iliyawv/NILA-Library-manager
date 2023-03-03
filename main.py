@@ -12,7 +12,7 @@ import pyglet
 # install path
 # os.path.realpath(os.path.dirname(__file__))
 # os.getcwd()
-instalPath = os.path.realpath(os.path.dirname(__file__))
+instalPath = os.getcwd()
 
 
 pyglet.font.add_file(instalPath+"/media/Helvetica-Bold.ttf")
