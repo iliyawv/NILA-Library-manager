@@ -304,7 +304,7 @@ def usersMenu():
                                        font=("Helvetica Rounded", 12), bg=cnvsbg)
                     lblbalance.place(relx=.15, rely=.9, anchor=CENTER)
 
-                    treeHitory = ttk.Treeview(lblfrm, height=10)
+                    treeHitory = ttk.Treeview(lblfrm, height=12)
                     treeHitory["columns"] = (
                         "Books Issued", "issued Date", "Return Date")
 
@@ -329,7 +329,7 @@ def usersMenu():
                     infoList = list(
                         zip(record[6].split("|"), record[8].split("|"), record[9].split("|")))
                     iidCount = 0
-                    for record in infoList:
+                    for record in infoList[2:]:
 
                         if iidCount % 2 == 1:
                             treeHitory.insert(parent="", index='end', iid=iidCount, text="",
@@ -339,7 +339,7 @@ def usersMenu():
                                               values=list(record), tag="evenrow")
                         iidCount += 1
 
-                    treeHitory.place(rely=.5, relx=.5, anchor=CENTER)
+                    treeHitory.place(rely=.4, relx=.5, anchor=CENTER)
 
                     userInfo.grab_set()
                     break
@@ -1016,12 +1016,12 @@ def issueMenu():
         cnvsIssue.place(relx=.5, rely=.5, anchor=CENTER)
 
         lblframeOptions = LabelFrame(cnvsIssue, text="OPTIONS", bd=2,
-                                     bg=cnvsbg, width=1000, height=100, font=("Helvetica Rounded", 10))
+                                     bg=cnvsbg, width=400, height=100, font=("Helvetica Rounded", 10))
         lblframeOptions.place(rely=.85, relx=.5, anchor=CENTER)
 
         btnAddIssue = Button(lblframeOptions, text="issue a book",
                              bg=btnbg, font=("Helvetica Rounded", 12), command=addIssue)
-        btnAddIssue.place(rely=.5, relx=.2, anchor=CENTER)
+        btnAddIssue.place(rely=.5, relx=.3, anchor=CENTER)
 
         def returnBook():
             global dfIssues, treeIssues, penalty, dfBooks
@@ -1058,7 +1058,7 @@ def issueMenu():
 
         btnReturn = Button(lblframeOptions, text="Return",
                            bg=btnbg, font=("Helvetica Rounded", 12), command=returnBook)
-        btnReturn.place(rely=.5, relx=.5, anchor=CENTER)
+        btnReturn.place(rely=.5, relx=.7, anchor=CENTER)
 
         def issueList():
             global lblfrmIssues, dfIssues
