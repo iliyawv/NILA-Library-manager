@@ -6,18 +6,19 @@ from tkinter import ttk
 import pandas as pd
 import random
 import datetime as dt
-from tkcalendar.calendar_ import Calendar
-import pyglet
+from tkcalendar import Calendar
 
-# install path
-# os.path.realpath(os.path.dirname(__file__))
+import babel.numbers
+
+# install path {
+# use this while runing with python command -> os.path.realpath(os.path.dirname(__file__))
 # os.getcwd()
 instalPath = os.getcwd()
+# }
 
 
-pyglet.font.add_file(instalPath+"/media/Helvetica-Bold.ttf")
 # general attributes
-pageStatus = 2
+pageStatus = 1
 isHidden = True
 dbsort = "NONE"
 
@@ -96,7 +97,7 @@ def loginPage():
         password = entPass.get()
         try:
             credential = open(
-                instalPath+f"/{username}.txt", "r")
+                instalPath+"/credentials"f"/{username}.txt", "r")
             if credential.read() != password:
                 tkinter.messagebox.showwarning(
                     title="ERROR", message="credential is unmatched")
@@ -105,6 +106,7 @@ def loginPage():
                 pageStatus = 2
                 canvas.destroy()
                 firstMenu()
+            credential.close()
 
         except:
             tkinter.messagebox.showwarning(
